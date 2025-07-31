@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="eTetkik" />
+        <module name="DoktorumYanimda" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="DoktorumYanimda" options="-endorseddirs &quot;F:\Projects\Kodlabs\eTetkikServer\eTetkik Server\target/endorsed&quot;" />
+      <module name="eTetkik" options="-endorseddirs &quot;S:\Korona\eTetkik\server\eTetkik Server\target/endorsed&quot;" />
+      <module name="eTetkik Server" options="-endorseddirs &quot;S:\Projects\Kodlabs\eTetkikServer\eTetkik Server\target/endorsed&quot;" />
+    </option>
+  </component>
+</project>

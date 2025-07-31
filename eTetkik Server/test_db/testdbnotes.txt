@@ -1,0 +1,18 @@
+root@server-ibgdhjm:/tmp# mysql -V
+mysql  Ver 8.0.30-0ubuntu0.20.04.2 for Linux on x86_64 ((Ubuntu))
+
+Take a backup:
+root@server-ibgdhjm:/tmp# mysqldump -u root etetkik > etetkiktestdb.sql
+
+
+Restore from backup:
+1- Create the db first in mysql
+CREATE DATABASE etetkiktestdb;
+
+2- Exit mysql and run the following command
+root@server-ibgdhjm:/tmp# mysql -u root etetkiktestdb < ./etetkiktestdb.sql
+
+Copy backup file:
+C:\Users\giray>scp root@xxx.xx.xxx.xxx:/tmp/etetkiktestdb.sql .
+
+

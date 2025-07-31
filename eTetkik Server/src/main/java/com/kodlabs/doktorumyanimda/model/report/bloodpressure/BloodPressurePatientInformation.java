@@ -1,0 +1,16 @@
+package com.kodlabs.doktorumyanimda.model.report.bloodpressure;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+public class BloodPressurePatientInformation {
+    private String patientID;
+    private String name;
+    private String surname;
+}
