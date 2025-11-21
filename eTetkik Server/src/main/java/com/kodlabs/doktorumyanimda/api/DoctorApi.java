@@ -41,104 +41,113 @@ import java.util.stream.Collectors;
 public class DoctorApi {
     @Path("/login")
     @POST
-    public ResponseEntity login(DoctorLoginRequest request){
+    public ResponseEntity login(DoctorLoginRequest request) {
         return Managers.doctorManager.login(request);
     }
 
     @GET
     @Path("/registration/information")
-    public ResponseEntitySet<List<RegistrationInformation>> registrationInformation(@QueryParam("tcNo")String tcNo,
-                                                                              @QueryParam("registrationNo")String registrationNo,
-                                                                              @QueryParam("serialNo")String serialNo) {
+    public ResponseEntitySet<List<RegistrationInformation>> registrationInformation(@QueryParam("tcNo") String tcNo,
+            @QueryParam("registrationNo") String registrationNo,
+            @QueryParam("serialNo") String serialNo) {
         return Managers.doctorManager.registrationInformation(tcNo, registrationNo, serialNo);
     }
 
     @Path("/v2/login")
     @POST
-    public ResponseEntitySet<String> loginV2(@Context HttpServletRequest hsr, DoctorLoginV2Request request){
-        return Managers.doctorManager.loginV2(request, Functions.getClientIpAddress(hsr));
+    public ResponseEntitySet<String> loginV2(@Context HttpServletRequest hsr, DoctorLoginV2Request request) {
+        return Managers.doctorManager.loginV2(request, hsr);
     }
 
     @POST
     @Path("/login/verify")
-    public ResponseEntitySet<UserDoctor> loginVerify(@Context HttpServletRequest hsr, DoctorLoginVerifyRequest request){
-        return Managers.doctorManager.loginVerify(request, Functions.getClientIpAddress(hsr));
-    }
-    @GET
-    @Path("/login/verify/new")
-    public ResponseEntity newLoginVerifyCode(@QueryParam("phone") String phone, @QueryParam("deviceID")String deviceID){
-        return Managers.doctorManager.newVerifyCode(phone, deviceID);
-    }
-    @Path("/register")
-    @POST
-    public ResponseEntity register(@Context HttpServletRequest hsr, DoctorRegister request){
-        return Managers.doctorManager.register(request, Functions.getClientIpAddress(hsr));
+    public ResponseEntitySet<UserDoctor> loginVerify(@Context HttpServletRequest hsr,
+            DoctorLoginVerifyRequest request) {
+        return Managers.doctorManager.loginVerify(request, hsr);
     }
 
+    @GET
+    @Path("/login/verify/new")
+    public ResponseEntity newLoginVerifyCode(@QueryParam("phone") String phone,
+            @QueryParam("deviceID") String deviceID) {
+        return Managers.doctorManager.newVerifyCode(phone, deviceID);
+    }
+
+    @Path("/register")
+    @POST
+    public ResponseEntity register(@Context HttpServletRequest hsr, DoctorRegister request) {
+        return Managers.doctorManager.register(request, hsr);
+    }
 
     @Path("/{doctorID}/delete")
     @DELETE
-    public ResponseEntity delete(@Context HttpServletRequest hsr, @QueryParam("userID")String userID, @QueryParam("type") String type, @PathParam("doctorID")String doctorID){
-        return Managers.doctorManager.delete(userID, AdminRole.getUserRole(type), doctorID, Functions.getClientIpAddress(hsr));
+    public ResponseEntity delete(@Context HttpServletRequest hsr, @QueryParam("userID") String userID,
+            @QueryParam("type") String type, @PathParam("doctorID") String doctorID) {
+        return Managers.doctorManager.delete(userID, AdminRole.getUserRole(type), doctorID, hsr);
     }
 
     @Path("/{doctorID}/detail/all")
     @GET
     public ResponseEntitySet<DoctorAllDetail> allDetail(@Context HttpServletRequest request,
-                                                        @QueryParam("userID")String userID,
-                                                        @QueryParam("type")String type,
-                                                        @PathParam("doctorID")String doctorID){
+            @QueryParam("userID") String userID,
+            @QueryParam("type") String type,
+            @PathParam("doctorID") String doctorID) {
         System.out.println(Functions.getClientIpAddress(request));
         return Managers.doctorManager.allDetail(userID, AdminRole.getUserRole(type), doctorID);
     }
 
     @Path("/update/side/admin")
     @POST
-    public ResponseEntity updateSideAdmin(@Context HttpServletRequest hsr,  DoctorUpdateSideAdminRequest request){
-        return Managers.doctorManager.updateSideAdmin(request, Functions.getClientIpAddress(hsr));
+    public ResponseEntity updateSideAdmin(@Context HttpServletRequest hsr, DoctorUpdateSideAdminRequest request) {
+        return Managers.doctorManager.updateSideAdmin(request, hsr);
     }
 
     @Path("/contract/accept")
     @POST
-    public ResponseEntity contractAccept(@Context HttpServletRequest hsr, ContractAcceptRequest request){
-        return Managers.doctorManager.contractAccept(request, Functions.getClientIpAddress(hsr));
+    public ResponseEntity contractAccept(@Context HttpServletRequest hsr, ContractAcceptRequest request) {
+        return Managers.doctorManager.contractAccept(request, hsr);
     }
 
     @Path("/list")
     @GET
-    public ResponseEntitySet<List<DoctorInformationForAdmin>> getDoctorList(@QueryParam("userID")String userID, @QueryParam("type")String type){
+    public ResponseEntitySet<List<DoctorInformationForAdmin>> getDoctorList(@QueryParam("userID") String userID,
+            @QueryParam("type") String type) {
         return Managers.doctorManager.doctorList(userID, type);
     }
 
     @Path("/consultation/list")
     @GET
-    public ResponseEntitySet<List<ConsultationDoctorDTO>> doctorListForAnonymousState(@QueryParam("branch")String branch, @QueryParam("city")String city, @QueryParam("os")String os){
-        ResponseEntitySet<List<DoctorInformation>> doctorResponse = Managers.doctorManager.notAnonymousDoctorList(branch, city, os);
-        if(doctorResponse.isSuccess){
-            List<ConsultationDoctorDTO> doctorDTOList = doctorResponse.getData().stream().map(item -> ModelMapper.getInstance().map(item, ConsultationDoctorDTO.class)).collect(Collectors.toList());
+    public ResponseEntitySet<List<ConsultationDoctorDTO>> doctorListForAnonymousState(
+            @QueryParam("branch") String branch, @QueryParam("city") String city, @QueryParam("os") String os) {
+        ResponseEntitySet<List<DoctorInformation>> doctorResponse = Managers.doctorManager
+                .notAnonymousDoctorList(branch, city, os);
+        if (doctorResponse.isSuccess) {
+            List<ConsultationDoctorDTO> doctorDTOList = doctorResponse.getData().stream()
+                    .map(item -> ModelMapper.getInstance().map(item, ConsultationDoctorDTO.class))
+                    .collect(Collectors.toList());
             return new ResponseEntitySet<>(doctorDTOList);
-        }else{
+        } else {
             return new ResponseEntitySet<>(false, doctorResponse.message);
         }
     }
 
     @Path("/information")
     @GET
-    public ResponseEntitySet<DoctorInformation> getDoctorInformation(@QueryParam("doctorID")String doctorID){
+    public ResponseEntitySet<DoctorInformation> getDoctorInformation(@QueryParam("doctorID") String doctorID) {
         return Managers.doctorManager.doctorInformation(doctorID);
     }
 
     @Path("/pay/information")
     @GET
-    public ResponseEntitySet<DoctorPayInformation> payInformation(@QueryParam("drCodeOrID") String drCodeOrID){
-       return Managers.doctorManager.payInformation(drCodeOrID);
+    public ResponseEntitySet<DoctorPayInformation> payInformation(@QueryParam("drCodeOrID") String drCodeOrID) {
+        return Managers.doctorManager.payInformation(drCodeOrID);
     }
 
     @Path("/update")
     @POST
-    public ResponseEntity update(DoctorUpdateRequest request){
-        if(request.isValid()){
-            request.setPassword(Functions.toSHA1(request.getPassword()));
+    public ResponseEntity update(DoctorUpdateRequest request) {
+        if (request.isValid()) {
+            request.setPassword(Functions.toSHA256(request.getPassword()));
         }
         return Managers.doctorManager.doctorUpdate(request);
     }
@@ -146,23 +155,21 @@ public class DoctorApi {
     /* Branches */
     @Path("/branch/list")
     @GET
-    public ResponseEntitySet<List<String>> branches(){
+    public ResponseEntitySet<List<String>> branches() {
         ResponseEntitySet<List<Branch>> response = Managers.doctorManager.branches();
-        if(response.isSuccess){
+        if (response.isSuccess) {
             return new ResponseEntitySet<>(
                     response.getData().stream()
                             .map(Branch::getName)
-                            .collect(Collectors.toList())
-            );
+                            .collect(Collectors.toList()));
         }
         return new ResponseEntitySet<>(false, response.message);
     }
     /* End */
 
-
     @Path("/branch/detail/list")
     @GET
-    public ResponseEntitySet<List<Branch>> fullBranches(){
+    public ResponseEntitySet<List<Branch>> fullBranches() {
         return Managers.doctorManager.branches();
     }
 
@@ -170,145 +177,142 @@ public class DoctorApi {
 
     @GET
     @Path("/profile")
-    public ResponseEntitySet<DoctorProfile> profile(@QueryParam("userID")String userID){
+    public ResponseEntitySet<DoctorProfile> profile(@QueryParam("userID") String userID) {
         return Managers.doctorProfileManager.profile(userID);
     }
 
     @POST
     @Path("/profile/update")
-    public ResponseEntity profileUpdate(@Context HttpServletRequest hsr, ProfileUpdateRequest<DoctorProfile> request){
-        return Managers.doctorProfileManager.update(request, Functions.getClientIpAddress(hsr));
+    public ResponseEntity profileUpdate(@Context HttpServletRequest hsr, ProfileUpdateRequest<DoctorProfile> request) {
+        return Managers.doctorProfileManager.update(request, hsr);
     }
 
     @PUT
     @Path("/{doctorID}/profile/update")
-    public ResponseEntity profileUpdateV2(@Context HttpServletRequest hsr, @PathParam("doctorID")String doctorID, DoctorProfileUpdate profileUpdate){
-        return Managers.doctorProfileManager.updateV2(doctorID, profileUpdate, Functions.getClientIpAddress(hsr));
+    public ResponseEntity profileUpdateV2(@Context HttpServletRequest hsr, @PathParam("doctorID") String doctorID,
+            DoctorProfileUpdate profileUpdate) {
+        return Managers.doctorProfileManager.updateV2(doctorID, profileUpdate, hsr);
     }
 
     /* Profile End */
 
     @Path("/password/change")
     @POST
-    public ResponseEntity changePassword(ChangePasswordRequest request){
+    public ResponseEntity changePassword(ChangePasswordRequest request) {
         return Managers.doctorManager.changePassword(request);
     }
 
     @Path("/password/reset")
     @POST
-    public ResponseEntity resetPassword(ResetPasswordRequest request){
+    public ResponseEntity resetPassword(ResetPasswordRequest request) {
         return Managers.doctorManager.resetPassword(request);
     }
 
     /* Detail */
     @Path("/detail")
     @GET
-    public ResponseEntitySet<DoctorDetail> detail(@QueryParam("doctorID")String doctorID){
+    public ResponseEntitySet<DoctorDetail> detail(@QueryParam("doctorID") String doctorID) {
         return Managers.doctorManager.detail(doctorID);
     }
 
     @Path("/detail/update")
     @POST
-    public ResponseEntity detailUpdate(DoctorDetailUpdateRequest request){
+    public ResponseEntity detailUpdate(DoctorDetailUpdateRequest request) {
         return Managers.doctorManager.detailUpdate(request);
     }
 
-
     @Path("/peak/demand/count")
     @GET
-    public ResponseEntitySet<Integer> peakDemandCount(@QueryParam("doctorID")String doctorID){
+    public ResponseEntitySet<Integer> peakDemandCount(@QueryParam("doctorID") String doctorID) {
         return Managers.doctorManager.peakDemandCount(doctorID);
     }
 
     /* Peak Fee */
     @Path("/peak/fee")
     @GET
-    public ResponseEntitySet<List<PeakFeeDetail>> peakFeeDetail(@QueryParam("doctorID")String doctorID){
+    public ResponseEntitySet<List<PeakFeeDetail>> peakFeeDetail(@QueryParam("doctorID") String doctorID) {
         return Managers.doctorManager.peakFeeDetail(doctorID);
     }
 
     @Path("/peak/fee/update")
     @PUT
-    public ResponseEntity peakFeeDetailUpdate(PeakFeeRequest request){
+    public ResponseEntity peakFeeDetailUpdate(PeakFeeRequest request) {
         return Managers.doctorManager.peakFeeDetailUpdate(request);
     }
 
     @Path("/peak/fee/add")
     @POST
-    public ResponseEntitySet<String> peakFeeDetailAdd(PeakFeeRequest request){
+    public ResponseEntitySet<String> peakFeeDetailAdd(PeakFeeRequest request) {
         return Managers.doctorManager.peakFeeDetailAdd(request);
     }
 
     @Path("/{doctorID}/peak/fee/{id}/delete")
     @DELETE
-    public ResponseEntity peakFeeDetailDelete(@PathParam("doctorID")String doctorID, @PathParam("id")String id){
+    public ResponseEntity peakFeeDetailDelete(@PathParam("doctorID") String doctorID, @PathParam("id") String id) {
         return Managers.doctorManager.peakFeeDetailDelete(doctorID, id);
     }
 
     /* Available Province */
     @Path("/available/cities")
     @GET
-    public ResponseEntitySet<List<String>> doctorAvailableCities(){
+    public ResponseEntitySet<List<String>> doctorAvailableCities() {
         return Managers.doctorManager.doctorAvailableCities();
     }
-
 
     /* Balance */
     @Path("/balance")
     @GET
-    public ResponseEntitySet<Integer> doctorBalance(@QueryParam("doctorID")String doctorID){
+    public ResponseEntitySet<Integer> doctorBalance(@QueryParam("doctorID") String doctorID) {
         return Managers.doctorManager.drBalance(doctorID);
     }
-
 
     /* Social */
     @GET
     @Path("/social/accounts")
-    public ResponseEntitySet<List<SocialAccount>> socialAccounts(@QueryParam("userID")String userID){
+    public ResponseEntitySet<List<SocialAccount>> socialAccounts(@QueryParam("userID") String userID) {
         return Managers.doctorManager.socialAccounts(userID);
     }
 
     @DELETE
     @Path("/social/account/{id}/delete")
-    public ResponseEntity socialAccountDelete(@PathParam("id")String id){
+    public ResponseEntity socialAccountDelete(@PathParam("id") String id) {
         return Managers.doctorManager.socialAccountDelete(id);
     }
 
     @POST
     @Path("/social/account/add")
-    public ResponseEntitySet<String> socialAccountAdd(SocialRequest<SocialAccount> request){
+    public ResponseEntitySet<String> socialAccountAdd(SocialRequest<SocialAccount> request) {
         return Managers.doctorManager.socialAccountAdd(request);
     }
 
     @GET
     @Path("/social/shares")
-    public ResponseEntitySet<List<SocialShare>> socialShares(@QueryParam("userID")String userID){
+    public ResponseEntitySet<List<SocialShare>> socialShares(@QueryParam("userID") String userID) {
         return Managers.doctorManager.socialShares(userID);
     }
 
     @DELETE
     @Path("/social/share/{id}/delete")
-    public ResponseEntity socialShareDelete(@PathParam("id")String id){
+    public ResponseEntity socialShareDelete(@PathParam("id") String id) {
         return Managers.doctorManager.socialShareDelete(id);
     }
 
     @POST
     @Path("/social/share/add")
-    public ResponseEntitySet<String> socialShareAdd(SocialRequest<SocialShare> request){
+    public ResponseEntitySet<String> socialShareAdd(SocialRequest<SocialShare> request) {
         return Managers.doctorManager.socialShareAdd(request);
     }
 
-
-    //Recipe Information
+    // Recipe Information
     @GET
     @Path("/{userID}/recipe/information")
-    public ResponseEntitySet<DoctorRecipeInformation> recipeInformation(@PathParam("userID") String userID){
+    public ResponseEntitySet<DoctorRecipeInformation> recipeInformation(@PathParam("userID") String userID) {
         return Managers.doctorManager.recipeInformation(userID);
     }
 
     @POST
     @Path("/recipe/information")
-    public ResponseEntity recipeInformationCreate(DoctorRecipeInformationCreate doctorRecipeInformationCreate){
+    public ResponseEntity recipeInformationCreate(DoctorRecipeInformationCreate doctorRecipeInformationCreate) {
         return Managers.doctorManager.recipeInformationUpdate(doctorRecipeInformationCreate);
     }
 
@@ -317,11 +321,12 @@ public class DoctorApi {
     public ResponseEntitySet<List<TahsilSonuc>> educationInformation(CkysRequest request) {
         return Managers.doctorManager.tahsilBilgisiSorgula(request);
     }
+
     @GET
     @Path("/information/working")
-    public ResponseEntitySet<List<CalismaSonuc>> workingInformation(@QueryParam("tcNo")String tcNo,
-                                                                    @QueryParam("registrationNo")String registrationNo,
-                                                                    @QueryParam("serialNo")String serialNo) {
+    public ResponseEntitySet<List<CalismaSonuc>> workingInformation(@QueryParam("tcNo") String tcNo,
+            @QueryParam("registrationNo") String registrationNo,
+            @QueryParam("serialNo") String serialNo) {
         return Managers.doctorManager.calismaBilgisiSorgula(tcNo, registrationNo, serialNo);
     }
 }

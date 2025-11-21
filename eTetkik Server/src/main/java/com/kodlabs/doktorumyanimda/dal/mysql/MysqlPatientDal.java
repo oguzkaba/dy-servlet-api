@@ -35,16 +35,16 @@ import java.util.*;
 public class MysqlPatientDal implements IPatientDal {
     @Override
     public ResponseEntitySet<List<PatientForAdmin>> getAllPatients() throws ConnectionException {
-        if(MysqlConnection.getInstance() == null)
+        if (MysqlConnection.getInstance() == null)
             throw new ConnectionException();
         ResponseEntitySet<List<PatientForAdmin>> response;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL patients() }");
             resultSet = statement.executeQuery();
             List<PatientForAdmin> patientList = new ArrayList<>();
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 final PatientForAdmin patient = new PatientForAdmin(
                         resultSet.getString("name"),
                         resultSet.getString("surname"),
@@ -54,22 +54,21 @@ public class MysqlPatientDal implements IPatientDal {
                         Functions.encodeBase64(resultSet.getBytes("picture")),
                         resultSet.getString("gender"),
                         resultSet.getInt("age"),
-                        resultSet.getString("createDate")
-                );
+                        resultSet.getString("createDate"));
                 patientList.add(patient);
             }
             response = new ResponseEntitySet<>(patientList);
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null) {
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null) {
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -78,18 +77,18 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntitySet<List<Patient>> getAllDoctorPatients(String doctorID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null) {
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         ResponseEntitySet<List<Patient>> response;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL doctorPatients(?) }");
-            statement.setString(1,doctorID);
+            statement.setString(1, doctorID);
             resultSet = statement.executeQuery();
             List<Patient> patientList = new ArrayList<>();
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 final Patient patient = new Patient(
                         resultSet.getString("name"),
                         resultSet.getString("surname"),
@@ -99,22 +98,21 @@ public class MysqlPatientDal implements IPatientDal {
                         resultSet.getString("createDate"),
                         Functions.encodeBase64(resultSet.getBytes("picture")),
                         resultSet.getString("gender"),
-                        resultSet.getInt("age")
-                );
+                        resultSet.getInt("age"));
                 patientList.add(patient);
             }
             response = new ResponseEntitySet<>(patientList);
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null) {
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null) {
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -123,18 +121,18 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntitySet<List<Patient>> doctorOldPatients(String doctorID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null) {
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         ResponseEntitySet<List<Patient>> response;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL doctorOldPatients(?) }");
             statement.setString(1, doctorID);
             resultSet = statement.executeQuery();
             List<Patient> patientList = new ArrayList<>();
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 final Patient patient = new Patient(
                         resultSet.getString("name"),
                         resultSet.getString("surname"),
@@ -144,22 +142,21 @@ public class MysqlPatientDal implements IPatientDal {
                         null,
                         Functions.encodeBase64(resultSet.getBytes("picture")),
                         resultSet.getString("gender"),
-                        resultSet.getInt("age")
-                );
+                        resultSet.getInt("age"));
                 patientList.add(patient);
             }
             response = new ResponseEntitySet<>(patientList);
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null) {
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null) {
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -167,42 +164,41 @@ public class MysqlPatientDal implements IPatientDal {
     }
 
     @Override
-    public ResponseEntitySet<LoginData> loginV2(PatientLoginV2Request request, String verifyCode) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+    public ResponseEntitySet<LoginData> loginV2(PatientLoginV2Request request, String verifyCode)
+            throws ConnectionException {
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<LoginData> response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL patientLoginV2(?, ?, ?, ?) }");
             statement.setString(1, request.getUname());
-            statement.setString(2, Functions.toSHA1(request.getPassword()));
+            statement.setString(2, Functions.toSHA256(request.getPassword()));
             statement.setString(3, request.getLoginType());
             statement.setString(4, verifyCode);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 response = new ResponseEntitySet<>(
                         new LoginData(
                                 resultSet.getString("phone"),
-                                verifyCode
-                        )
-                );
-            }else{
+                                verifyCode));
+            } else {
                 throw new SQLException(ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             System.out.println(e.getErrorCode());
             response = new ResponseEntitySet<>(false, e.getErrorCode(), e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -211,17 +207,18 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntitySet<UserPatient> singUpV2(PatientSingUpV2Request request) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<UserPatient> response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("{ CALL patientSingUp(?, ?, ?, ?, ?, ?, ?, ?, ?)}");
+        try {
+            statement = MysqlConnection.getInstance()
+                    .prepareStatement("{ CALL patientSingUp(?, ?, ?, ?, ?, ?, ?, ?, ?)}");
             statement.setString(1, request.getTcNumber());
             statement.setString(2, request.getPhone());
-            statement.setString(3, Functions.toSHA1(request.getPassword()));
+            statement.setString(3, Functions.toSHA256(request.getPassword()));
             statement.setString(4, request.getName());
             statement.setString(5, request.getSurname());
             statement.setString(6, request.getEmail());
@@ -229,56 +226,132 @@ public class MysqlPatientDal implements IPatientDal {
             statement.setString(8, request.getGender());
             statement.setBoolean(9, request.isKvkk());
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 response = new ResponseEntitySet<>(
                         new UserPatient(
-                                resultSet.getString("userID")
-                        )
-                );
-            }else{
+                                resultSet.getString("userID")));
+            } else {
                 throw new SQLException(ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
         return response;
     }
 
+    // Admin & Facility Admin Patient Delete
+    @Override
+    public ResponseEntity delete(String userID, byte role, String patientID) throws ConnectionException {
+        if (MysqlConnection.getInstance() == null) {
+            throw new ConnectionException();
+        }
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        ResponseEntity response;
+        try {
+            statement = MysqlConnection.getInstance().prepareStatement("{ CALL patientDelete(?, ?, ?) }");
+            statement.setString(1, userID);
+            statement.setByte(2, role);
+            statement.setString(3, patientID);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                if (resultSet.getBoolean("result")) {
+                    response = new ResponseEntity();
+                } else {
+                    throw new SQLException(ErrorMessages.operationFailed);
+                }
+            } else {
+                throw new SQLException(ErrorMessages.operationFailed);
+            }
+        } catch (SQLException e) {
+            response = new ResponseEntity(false, e.getLocalizedMessage());
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return response;
+    }
+
+    // Patient Self Delete
+    @Override
+    public ResponseEntity selfDelete(String userID) throws ConnectionException {
+        if (MysqlConnection.getInstance() == null) {
+            throw new ConnectionException();
+        }
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        ResponseEntity response;
+        try {
+            statement = MysqlConnection.getInstance().prepareStatement("{ CALL patientSelfDelete(?) }");
+            statement.setString(1, userID);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                if (resultSet.getBoolean("result")) {
+                    response = new ResponseEntity();
+                } else {
+                    throw new SQLException(ErrorMessages.operationFailed);
+                }
+            } else {
+                throw new SQLException(ErrorMessages.operationFailed);
+            }
+        } catch (SQLException e) {
+            response = new ResponseEntity(false, e.getLocalizedMessage());
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return response;
+    }
 
     @Override
     public ResponseEntitySet<String> updateVerifyCode(String phone, String verifyCode) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResponseEntitySet<String> response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL patientUpdateVerifyCode(?, ?) }");
             statement.setString(1, phone);
             statement.setString(2, verifyCode);
             statement.execute();
             response = new ResponseEntitySet<>(
-                    verifyCode
-            );
-        }catch (SQLException e){
+                    verifyCode);
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -287,27 +360,26 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntitySet<String> create(String phone, String verifyCode) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResponseEntitySet<String> response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL patientRegister(?, ?) }");
             statement.setString(1, phone);
             statement.setString(2, verifyCode);
             statement.execute();
             response = new ResponseEntitySet<>(
-                    verifyCode
-            );
-        }catch (SQLException e){
+                    verifyCode);
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -316,37 +388,35 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntitySet<UserPatient> loginVerify(PatientLoginVerifyRequest request) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<UserPatient> response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL patientLoginVerifyCode(?, ?) }");
             statement.setString(1, request.getPhone());
             statement.setString(2, request.getVerifyCode());
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 response = new ResponseEntitySet<>(
                         new UserPatient(
-                                resultSet.getString("userID")
-                        )
-                );
-            }else{
+                                resultSet.getString("userID")));
+            } else {
                 response = new ResponseEntitySet<>(false, ErrorMessages.notAccessUserInformation);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -355,38 +425,36 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntitySet<Contact> contact(String phoneOrUserID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<Contact> response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL contact(? ,?) }");
             statement.setString(1, phoneOrUserID);
             statement.setInt(2, Role.PATIENT.value());
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 response = new ResponseEntitySet<>(
                         new Contact(
                                 resultSet.getString("email"),
-                                resultSet.getString("phone")
-                        )
-                );
-            }else{
+                                resultSet.getString("phone")));
+            } else {
                 response = new ResponseEntitySet<>(false, ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -395,17 +463,17 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntitySet<Patient> information(String patientID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null) {
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         ResponseEntitySet<Patient> response;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL patientInformation(?) }");
             statement.setString(1, patientID);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 response = new ResponseEntitySet<>(
                         new Patient(
                                 resultSet.getString("name"),
@@ -415,24 +483,22 @@ public class MysqlPatientDal implements IPatientDal {
                                 resultSet.getString("userID"),
                                 Functions.encodeBase64(resultSet.getBytes("picture")),
                                 resultSet.getString("gender"),
-                                resultSet.getInt("age")
-                        )
-                );
-            }else{
+                                resultSet.getInt("age")));
+            } else {
                 response = new ResponseEntitySet<>(false, ErrorMessages.notAccessPatientInformation);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null) {
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
 
-                if(resultSet != null) {
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -441,25 +507,25 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntity patientStatusUpdate(PatientStatusUpdateRequest request) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null)
+        if (MysqlConnection.getInstance() == null)
             throw new ConnectionException();
         PreparedStatement statement = null;
         ResponseEntity response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL patientStatusUpdate(?, ?, ?) }");
             statement.setString(1, request.getPatientID());
             statement.setString(2, request.getFieldName());
             statement.setBoolean(3, request.isValue());
             statement.execute();
             response = new ResponseEntity();
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntity(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null) {
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -468,29 +534,29 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntitySet<String> patientGetStatus(String patientID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null)
+        if (MysqlConnection.getInstance() == null)
             throw new ConnectionException();
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<String> response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL patientStatus(?) }");
-            statement.setString(1,patientID);
+            statement.setString(1, patientID);
             resultSet = statement.executeQuery();
-            if(resultSet != null && resultSet.next()){
+            if (resultSet != null && resultSet.next()) {
                 return new ResponseEntitySet<>(resultSet.getString("status"));
-            }else{
+            } else {
                 return new ResponseEntitySet<>(false, ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null)
+        } finally {
+            try {
+                if (statement != null)
                     statement.close();
-                if(resultSet != null)
+                if (resultSet != null)
                     resultSet.close();
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -498,45 +564,46 @@ public class MysqlPatientDal implements IPatientDal {
     }
 
     @Override
-    public ResponseEntitySet<List<Inspection>> inspectionList(String patientID, String doctorID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+    public ResponseEntitySet<List<Inspection>> inspectionList(String patientID, String doctorID)
+            throws ConnectionException {
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<List<Inspection>> response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("SELECT inspection.*, `date`, start_hour, end_hour, start_minute, end_minute FROM inspection LEFT JOIN et_time_slot ON inspection.appointmentID = et_time_slot.appointment_id WHERE  inspection.patientID = ? AND inspection.doctorID = ?");
+        try {
+            statement = MysqlConnection.getInstance().prepareStatement(
+                    "SELECT inspection.*, `date`, start_hour, end_hour, start_minute, end_minute FROM inspection LEFT JOIN et_time_slot ON inspection.appointmentID = et_time_slot.appointment_id WHERE  inspection.patientID = ? AND inspection.doctorID = ?");
             statement.setString(1, patientID);
             statement.setString(2, doctorID);
             resultSet = statement.executeQuery();
             List<Inspection> result = new ArrayList<>();
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 result.add(new Inspection(
-                    resultSet.getString("id"),
-                    resultSet.getString("patientID"),
-                    resultSet.getString("doctorID"),
-                    resultSet.getInt("appointmentID"),
-                    Functions.timeStampToLocalDateTime(resultSet.getTimestamp("createDateTime"), "GMT+3"),
+                        resultSet.getString("id"),
+                        resultSet.getString("patientID"),
+                        resultSet.getString("doctorID"),
+                        resultSet.getInt("appointmentID"),
+                        Functions.timeStampToLocalDateTime(resultSet.getTimestamp("createDateTime"), "GMT+3"),
                         new TimeSlot(resultSet.getString("date"),
                                 resultSet.getInt("start_hour"),
                                 resultSet.getInt("start_minute"),
                                 resultSet.getInt("end_hour"),
-                                resultSet.getInt("end_minute"))
-                ));
+                                resultSet.getInt("end_minute"))));
             }
             response = new ResponseEntitySet<>(result);
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -545,28 +612,28 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntity inspectionDelete(String inspectionID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResponseEntity response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("DELETE FROM inspection WHERE id = ?");
             statement.setString(1, inspectionID);
             int result = statement.executeUpdate();
-            if(result > 0){
+            if (result > 0) {
                 response = new ResponseEntity();
-            }else{
+            } else {
                 response = new ResponseEntity(false, ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntity(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null) {
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -575,32 +642,33 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public boolean inspectionExists(String inspectionID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         boolean result;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("SELECT IF(EXISTS(SELECT * FROM inspection WHERE id = ?), 1, 0) AS result");
+        try {
+            statement = MysqlConnection.getInstance()
+                    .prepareStatement("SELECT IF(EXISTS(SELECT * FROM inspection WHERE id = ?), 1, 0) AS result");
             statement.setString(1, inspectionID);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 result = resultSet.getBoolean("result");
-            }else{
+            } else {
                 result = false;
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             result = false;
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -609,28 +677,28 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntity inspectionContentDelete(String inspectionContentID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResponseEntity response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("DELETE FROM inspection_content WHERE id = ?");
             statement.setString(1, inspectionContentID);
             int result = statement.executeUpdate();
-            if(result > 0){
+            if (result > 0) {
                 response = new ResponseEntity();
-            }else{
+            } else {
                 response = new ResponseEntity(false, ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntity(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -638,42 +706,44 @@ public class MysqlPatientDal implements IPatientDal {
     }
 
     @Override
-    public ResponseEntitySet<String> inspectionContentCreate(InspectionContent inspectionContent) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+    public ResponseEntitySet<String> inspectionContentCreate(InspectionContent inspectionContent)
+            throws ConnectionException {
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<String> response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("{ CALL inspectionContentCreate(?, ?, ?, ?, ?)}");
+        try {
+            statement = MysqlConnection.getInstance()
+                    .prepareStatement("{ CALL inspectionContentCreate(?, ?, ?, ?, ?)}");
             statement.setString(1, inspectionContent.getInspectionID());
             statement.setString(2, inspectionContent.getTitle());
             statement.setString(3, inspectionContent.getSymptom());
             statement.setString(4, inspectionContent.getComplaint());
             statement.setString(5, inspectionContent.getAnamnesis());
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 String generateId = resultSet.getString("generateId");
-                if(!TextUtils.isEmpty(generateId)){
+                if (!TextUtils.isEmpty(generateId)) {
                     response = new ResponseEntitySet<>(generateId);
-                }else{
+                } else {
                     response = new ResponseEntitySet<>(false, ErrorMessages.operationFailed);
                 }
-            }else{
+            } else {
                 response = new ResponseEntitySet<>(false, ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -682,32 +752,33 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public boolean inspectionContentExists(String contentID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         boolean result;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("SELECT IF(EXISTS(SELECT * FROM inspection_content WHERE id = ?), 1, 0) AS result");
+        try {
+            statement = MysqlConnection.getInstance().prepareStatement(
+                    "SELECT IF(EXISTS(SELECT * FROM inspection_content WHERE id = ?), 1, 0) AS result");
             statement.setString(1, contentID);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 result = resultSet.getBoolean("result");
-            }else{
+            } else {
                 result = false;
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             result = false;
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -715,19 +786,21 @@ public class MysqlPatientDal implements IPatientDal {
     }
 
     @Override
-    public ResponseEntitySet<List<InspectionContent>> inspectionContentList(String inspectionID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+    public ResponseEntitySet<List<InspectionContent>> inspectionContentList(String inspectionID)
+            throws ConnectionException {
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<List<InspectionContent>> response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("SELECT * FROM inspection_content WHERE inspection_id = ?");
+        try {
+            statement = MysqlConnection.getInstance()
+                    .prepareStatement("SELECT * FROM inspection_content WHERE inspection_id = ?");
             statement.setString(1, inspectionID);
             resultSet = statement.executeQuery();
             List<InspectionContent> result = new ArrayList<>();
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 result.add(new InspectionContent(
                         resultSet.getString("id"),
                         resultSet.getString("inspection_id"),
@@ -736,21 +809,20 @@ public class MysqlPatientDal implements IPatientDal {
                         resultSet.getString("complaint"),
                         resultSet.getString("anamnesis"),
                         Functions.timeStampToLocalDateTime(resultSet.getTimestamp("updateDateTime"), "GMT+3"),
-                        Functions.timeStampToLocalDateTime(resultSet.getTimestamp("createDateTime"), "GMT+3")
-                ));
+                        Functions.timeStampToLocalDateTime(resultSet.getTimestamp("createDateTime"), "GMT+3")));
             }
             response = new ResponseEntitySet<>(result);
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -759,70 +831,70 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntity inspectionContentUpdate(InspectionContent inspectionContent) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResponseEntity response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("UPDATE inspection_content SET title = ?, symptom = ?, complaint = ?, anamnesis = ? WHERE id = ?");
+        try {
+            statement = MysqlConnection.getInstance().prepareStatement(
+                    "UPDATE inspection_content SET title = ?, symptom = ?, complaint = ?, anamnesis = ? WHERE id = ?");
             statement.setString(1, inspectionContent.getTitle());
             statement.setString(2, inspectionContent.getSymptom());
             statement.setString(3, inspectionContent.getComplaint());
             statement.setString(4, inspectionContent.getAnamnesis());
             statement.setString(5, inspectionContent.getId());
             int result = statement.executeUpdate();
-            if(result > 0){
+            if (result > 0) {
                 response = new ResponseEntity();
-            }else{
+            } else {
                 response = new ResponseEntity(false, ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntity(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
         return response;
     }
 
-
     /* Patient Notes */
 
     @Override
     public ResponseEntitySet<String> notesCreate(String patientID, String doctorID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<String> response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL createPatientNotes(?, ?)}");
             statement.setString(1, patientID);
             statement.setString(2, doctorID);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 response = new ResponseEntitySet<>(resultSet.getString("result"));
-            }else{
+            } else {
                 response = new ResponseEntitySet<>(false, ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -831,34 +903,35 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public boolean noteExist(String patientID, String doctorID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
 
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         boolean result;
-        try{
-           statement = MysqlConnection.getInstance().prepareStatement("SELECT IF(EXISTS(SELECT * FROM patient_notes WHERE patientID = ? AND doctorID = ?), 1, 0) AS result");
-           statement.setString(1, patientID);
-           statement.setString(2, doctorID);
-           resultSet = statement.executeQuery();
-           if(resultSet.next()){
-               result = resultSet.getBoolean("result");
-           }else{
-               result = false;
-           }
-        }catch (SQLException e){
+        try {
+            statement = MysqlConnection.getInstance().prepareStatement(
+                    "SELECT IF(EXISTS(SELECT * FROM patient_notes WHERE patientID = ? AND doctorID = ?), 1, 0) AS result");
+            statement.setString(1, patientID);
+            statement.setString(2, doctorID);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                result = resultSet.getBoolean("result");
+            } else {
+                result = false;
+            }
+        } catch (SQLException e) {
             result = false;
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet !=  null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -867,34 +940,35 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntitySet<String> notes(String patientID, String doctorID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<String> response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("SELECT * FROM patient_notes WHERE patientID = ? AND doctorID = ?");
+        try {
+            statement = MysqlConnection.getInstance()
+                    .prepareStatement("SELECT * FROM patient_notes WHERE patientID = ? AND doctorID = ?");
             statement.setString(1, patientID);
             statement.setString(2, doctorID);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 response = new ResponseEntitySet<>(resultSet.getString("noteID"));
-            }else{
+            } else {
                 response = new ResponseEntitySet<>(false, ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
 
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -903,41 +977,40 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntitySet<PatientNotes> note(String patientID, String doctorID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<PatientNotes> response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("SELECT * FROM patient_notes WHERE  patientID  = ? AND doctorID = ?");
+        try {
+            statement = MysqlConnection.getInstance()
+                    .prepareStatement("SELECT * FROM patient_notes WHERE  patientID  = ? AND doctorID = ?");
             statement.setString(1, patientID);
             statement.setString(2, doctorID);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 response = new ResponseEntitySet<>(
                         new PatientNotes(
                                 resultSet.getInt("id"),
                                 resultSet.getString("patientID"),
                                 resultSet.getString("doctorID"),
                                 resultSet.getString("noteID"),
-                                resultSet.getString("createDateTime")
-                        )
-                );
-            }else{
+                                resultSet.getString("createDateTime")));
+            } else {
                 response = new ResponseEntitySet<>(false, ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     statement.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -945,20 +1018,21 @@ public class MysqlPatientDal implements IPatientDal {
     }
 
     @Override
-    public ResponseEntitySet<PatientNotesContent> noteContentCreate(PatientNotesContentCreateRequest request) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+    public ResponseEntitySet<PatientNotesContent> noteContentCreate(PatientNotesContentCreateRequest request)
+            throws ConnectionException {
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<PatientNotesContent> response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL createPatientNotesContent(?, ?, ?)}");
             statement.setString(1, request.getTitle());
             statement.setString(2, request.getContent());
             statement.setString(3, request.getNoteID());
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 response = new ResponseEntitySet<>(new PatientNotesContent(
                         resultSet.getInt("id"),
                         resultSet.getString("title"),
@@ -966,19 +1040,18 @@ public class MysqlPatientDal implements IPatientDal {
                         resultSet.getString("contentID"),
                         resultSet.getString("noteID"),
                         Functions.timeStampToLocalDateTime(resultSet.getTimestamp("updateDateTime"), "GMT+3"),
-                        Functions.timeStampToLocalDateTime(resultSet.getTimestamp("createDateTime"), "GMT+3")
-                ));
-            }else{
+                        Functions.timeStampToLocalDateTime(resultSet.getTimestamp("createDateTime"), "GMT+3")));
+            } else {
                 response = new ResponseEntitySet<>(false, ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -986,31 +1059,32 @@ public class MysqlPatientDal implements IPatientDal {
     }
 
     @Override
-    public ResponseEntity noteContentUpdate(PatientNotesContentUpdateRequest request) throws ConnectionException{
-        if(MysqlConnection.getInstance() == null){
+    public ResponseEntity noteContentUpdate(PatientNotesContentUpdateRequest request) throws ConnectionException {
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResponseEntity response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("UPDATE patient_notes_content SET title = ?, content = ? WHERE contentID = ?");
+        try {
+            statement = MysqlConnection.getInstance()
+                    .prepareStatement("UPDATE patient_notes_content SET title = ?, content = ? WHERE contentID = ?");
             statement.setString(1, request.getTitle());
             statement.setString(2, request.getContent());
             statement.setString(3, request.getContentID());
             int result = statement.executeUpdate();
-            if(result > 0){
+            if (result > 0) {
                 response = new ResponseEntity();
-            }else{
+            } else {
                 response = new ResponseEntity(false, ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntity(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -1019,18 +1093,19 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntitySet<List<PatientNotesContent>> noteContents(String noteID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<List<PatientNotesContent>> response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("SELECT  * FROM patient_notes_content WHERE noteID = ?");
+        try {
+            statement = MysqlConnection.getInstance()
+                    .prepareStatement("SELECT  * FROM patient_notes_content WHERE noteID = ?");
             statement.setString(1, noteID);
             resultSet = statement.executeQuery();
             List<PatientNotesContent> results = new ArrayList<>();
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 results.add(new PatientNotesContent(
                         resultSet.getInt("id"),
                         resultSet.getString("title"),
@@ -1038,21 +1113,20 @@ public class MysqlPatientDal implements IPatientDal {
                         resultSet.getString("contentID"),
                         resultSet.getString("noteID"),
                         resultSet.getString("updateDateTime"),
-                        resultSet.getString("createDateTime")
-                ));
+                        resultSet.getString("createDateTime")));
             }
             response = new ResponseEntitySet<>(results);
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -1061,28 +1135,29 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntity noteContentDelete(String contentID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResponseEntity response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("DELETE FROM patient_notes_content WHERE contentID = ?");
+        try {
+            statement = MysqlConnection.getInstance()
+                    .prepareStatement("DELETE FROM patient_notes_content WHERE contentID = ?");
             statement.setString(1, contentID);
             int result = statement.executeUpdate();
-            if(result > 0){
+            if (result > 0) {
                 response = new ResponseEntity();
-            }else{
+            } else {
                 response = new ResponseEntity(false, ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntity(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -1094,18 +1169,19 @@ public class MysqlPatientDal implements IPatientDal {
     /* Patient SysTakipNo */
     @Override
     public ResponseEntitySet<List<PatientSysTakipNo>> sysTakipNoList(String doctorID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<List<PatientSysTakipNo>> response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("SELECT * FROM systakipno WHERE doctorID = ? AND active = true");
+        try {
+            statement = MysqlConnection.getInstance()
+                    .prepareStatement("SELECT * FROM systakipno WHERE doctorID = ? AND active = true");
             statement.setString(1, doctorID);
             resultSet = statement.executeQuery();
             List<PatientSysTakipNo> results = new ArrayList<>();
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 results.add(new PatientSysTakipNo(
                         resultSet.getInt("id"),
                         resultSet.getString("tc_number"),
@@ -1113,21 +1189,20 @@ public class MysqlPatientDal implements IPatientDal {
                         resultSet.getString("sys_takip_no"),
                         resultSet.getBoolean("active"),
                         Functions.timeStampToLocalDateTime(resultSet.getTimestamp("updateDateTime"), "GMT+3"),
-                        Functions.timeStampToLocalDateTime(resultSet.getTimestamp("createDateTime"), "GMT+3")
-                ));
+                        Functions.timeStampToLocalDateTime(resultSet.getTimestamp("createDateTime"), "GMT+3")));
             }
             response = new ResponseEntitySet<>(results);
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -1136,33 +1211,34 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntitySet<String> sysTakipNo(String tcNumber, String doctorID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<String> response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("SELECT sys_takip_no FROM systakipno WHERE tc_number = ? AND doctorID = ? AND active = 1");
+        try {
+            statement = MysqlConnection.getInstance().prepareStatement(
+                    "SELECT sys_takip_no FROM systakipno WHERE tc_number = ? AND doctorID = ? AND active = 1");
             statement.setString(1, tcNumber);
             statement.setString(2, doctorID);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 response = new ResponseEntitySet<>(resultSet.getString("sys_takip_no"));
-            }else{
+            } else {
                 response = new ResponseEntitySet<>(false, ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -1171,30 +1247,31 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntity sysTakipNoCreate(PatientSysTakipNoCreateRequest request) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResponseEntity response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("INSERT INTO systakipno(tc_number, doctorID, sys_takip_no, active, createDateTime) VALUE(?, ?, ?, true, NOW())");
+        try {
+            statement = MysqlConnection.getInstance().prepareStatement(
+                    "INSERT INTO systakipno(tc_number, doctorID, sys_takip_no, active, createDateTime) VALUE(?, ?, ?, true, NOW())");
             statement.setString(1, request.getTcNumber());
             statement.setString(2, request.getDoctorID());
             statement.setString(3, request.getSysTakipNo());
             int result = statement.executeUpdate();
-            if(result > 0){
+            if (result > 0) {
                 response = new ResponseEntity();
-            }else{
+            } else {
                 response = new ResponseEntity(false, ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntity(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -1203,31 +1280,32 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntity sysTakipNoUpdate(PatientSysTakipNoUpdateRequest request) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResponseEntity response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("UPDATE systakipno SET active = ? WHERE  tc_number = ? AND doctorID = ? AND sys_takip_no = ?");
+        try {
+            statement = MysqlConnection.getInstance().prepareStatement(
+                    "UPDATE systakipno SET active = ? WHERE  tc_number = ? AND doctorID = ? AND sys_takip_no = ?");
             statement.setBoolean(1, request.isActive());
             statement.setString(2, request.getTcNumber());
             statement.setString(3, request.getDoctorID());
             statement.setString(4, request.getSysTakipNo());
             int result = statement.executeUpdate();
-            if(result > 0){
+            if (result > 0) {
                 response = new ResponseEntity();
-            }else{
+            } else {
                 response = new ResponseEntity(false, ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntity(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -1236,33 +1314,34 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public boolean sysTakipNoExists(String tcNumber, String doctorID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         boolean result;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("SELECT IF(EXISTS(SELECT * FROM systakipno WHERE tc_number = ? AND  doctorID = ? AND active = 1), 1, 0) AS result");
+        try {
+            statement = MysqlConnection.getInstance().prepareStatement(
+                    "SELECT IF(EXISTS(SELECT * FROM systakipno WHERE tc_number = ? AND  doctorID = ? AND active = 1), 1, 0) AS result");
             statement.setString(1, tcNumber);
             statement.setString(2, doctorID);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 result = resultSet.getBoolean("result");
-            }else{
+            } else {
                 result = false;
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             result = false;
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -1271,144 +1350,150 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public boolean sysTakipNoExists(String sysTakipNo) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         boolean result;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("SELECT IF(EXISTS(SELECT  * FROM systakipno WHERE sys_takip_no = ? AND active = 1), 1, 0) AS result");
+        try {
+            statement = MysqlConnection.getInstance().prepareStatement(
+                    "SELECT IF(EXISTS(SELECT  * FROM systakipno WHERE sys_takip_no = ? AND active = 1), 1, 0) AS result");
             statement.setString(1, sysTakipNo);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 result = resultSet.getBoolean("result");
-            }else{
+            } else {
                 result = false;
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             result = false;
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
         return result;
     }
-    /* Patient SysTakipNo End*/
+    /* Patient SysTakipNo End */
 
     /* Patient Enabiz Service Information */
 
     @Override
-    public ResponseEntitySet<List<EnabizServiceInformation>> getEnabizServiceInformation(String sysTakipNo) throws ConnectionException {
-       if(MysqlConnection.getInstance() == null){
-           throw new ConnectionException();
-       }
-       PreparedStatement statement = null;
-       ResultSet resultSet = null;
-       ResponseEntitySet<List<EnabizServiceInformation>> response;
-       try{
-           statement = MysqlConnection.getInstance().prepareStatement("SELECT * FROM enabiz_service_information WHERE sys_takip_no = ? AND active = 1");
-           statement.setString(1, sysTakipNo);
-           resultSet = statement.executeQuery();
-           List<EnabizServiceInformation> informations = new ArrayList<>();
-           while(resultSet.next()){
-               informations.add(new EnabizServiceInformation(
-                       resultSet.getInt("id"),
-                       resultSet.getString("service_name"),
-                       resultSet.getString("service_reference_no"),
-                       resultSet.getString("sys_takip_no"),
-                       resultSet.getString("update_date"),
-                       resultSet.getString("create_date"),
-                       resultSet.getBoolean("active")
+    public ResponseEntitySet<List<EnabizServiceInformation>> getEnabizServiceInformation(String sysTakipNo)
+            throws ConnectionException {
+        if (MysqlConnection.getInstance() == null) {
+            throw new ConnectionException();
+        }
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        ResponseEntitySet<List<EnabizServiceInformation>> response;
+        try {
+            statement = MysqlConnection.getInstance()
+                    .prepareStatement("SELECT * FROM enabiz_service_information WHERE sys_takip_no = ? AND active = 1");
+            statement.setString(1, sysTakipNo);
+            resultSet = statement.executeQuery();
+            List<EnabizServiceInformation> informations = new ArrayList<>();
+            while (resultSet.next()) {
+                informations.add(new EnabizServiceInformation(
+                        resultSet.getInt("id"),
+                        resultSet.getString("service_name"),
+                        resultSet.getString("service_reference_no"),
+                        resultSet.getString("sys_takip_no"),
+                        resultSet.getString("update_date"),
+                        resultSet.getString("create_date"),
+                        resultSet.getBoolean("active")
 
-               ));
-           }
-           response = new ResponseEntitySet<>(informations);
-       }catch (SQLException e){
-           response = new ResponseEntitySet<>(false, e.getErrorCode(), e.getLocalizedMessage());
-       }finally {
-           try{
-               if(statement != null){
-                   statement.close();
-               }
-               if(resultSet != null){
-                   resultSet.close();
-               }
-           }catch (SQLException e){
-               e.printStackTrace();
-           }
-       }
-       return response;
+                ));
+            }
+            response = new ResponseEntitySet<>(informations);
+        } catch (SQLException e) {
+            response = new ResponseEntitySet<>(false, e.getErrorCode(), e.getLocalizedMessage());
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return response;
     }
 
     @Override
-    public ResponseEntity createEnabizServiceInformation(EnabizInformationServiceCreateRequest request) throws ConnectionException {
-       if(MysqlConnection.getInstance() == null){
-           throw new ConnectionException();
-       }
-       PreparedStatement statement = null;
-       ResponseEntity response;
-       try{
-           statement = MysqlConnection.getInstance().prepareStatement("INSERT INTO enabiz_service_information(service_name, service_reference_no, sys_takip_no, create_date, active) VALUE (? , ? ,?, NOW(), 1)");
-           statement.setString(1, request.getName());
-           statement.setString(2, request.getServiceReferenceNo());
-           statement.setString(3, request.getSysTakipNo());
-           int result = statement.executeUpdate();
-           if(result > 0){
-               response = new ResponseEntity();
-           }else{
-               response = new ResponseEntity(false, ErrorMessages.operationFailed);
-           }
-       }catch (SQLException e){
-           response = new ResponseEntity(false, e.getLocalizedMessage());
-       }finally {
-           try{
-               if(statement != null){
-                   statement.close();
-               }
-           }catch (SQLException e){
-               e.printStackTrace();
-           }
-       }
-       return  response;
+    public ResponseEntity createEnabizServiceInformation(EnabizInformationServiceCreateRequest request)
+            throws ConnectionException {
+        if (MysqlConnection.getInstance() == null) {
+            throw new ConnectionException();
+        }
+        PreparedStatement statement = null;
+        ResponseEntity response;
+        try {
+            statement = MysqlConnection.getInstance().prepareStatement(
+                    "INSERT INTO enabiz_service_information(service_name, service_reference_no, sys_takip_no, create_date, active) VALUE (? , ? ,?, NOW(), 1)");
+            statement.setString(1, request.getName());
+            statement.setString(2, request.getServiceReferenceNo());
+            statement.setString(3, request.getSysTakipNo());
+            int result = statement.executeUpdate();
+            if (result > 0) {
+                response = new ResponseEntity();
+            } else {
+                response = new ResponseEntity(false, ErrorMessages.operationFailed);
+            }
+        } catch (SQLException e) {
+            response = new ResponseEntity(false, e.getLocalizedMessage());
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return response;
     }
 
     @Override
     public boolean existsEnabizServiceReferenceNumber(String serviceReferenceNumber) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         boolean result;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("SELECT IF(EXISTS(SELECT * FROM enabiz_service_information WHERE service_reference_no = ?  AND active = 1), 1, 0) AS result");
+        try {
+            statement = MysqlConnection.getInstance().prepareStatement(
+                    "SELECT IF(EXISTS(SELECT * FROM enabiz_service_information WHERE service_reference_no = ?  AND active = 1), 1, 0) AS result");
             statement.setString(1, serviceReferenceNumber);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 result = resultSet.getBoolean("result");
-            }else{
+            } else {
                 result = false;
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             result = false;
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -1417,34 +1502,35 @@ public class MysqlPatientDal implements IPatientDal {
 
     @Override
     public ResponseEntity deleteEnabizServiceInformation(String serviceReferenceNumber) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResponseEntity response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("UPDATE enabiz_service_information SET active = 0 WHERE service_reference_no = ?");
+        try {
+            statement = MysqlConnection.getInstance().prepareStatement(
+                    "UPDATE enabiz_service_information SET active = 0 WHERE service_reference_no = ?");
             statement.setString(1, serviceReferenceNumber);
             int result = statement.executeUpdate();
-            if(result > 0){
+            if (result > 0) {
                 response = new ResponseEntity();
-            }else{
+            } else {
                 response = new ResponseEntity(false, ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntity(false, e.getErrorCode(), e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-            }catch (SQLException e){
-                if(e != null){
+            } catch (SQLException e) {
+                if (e != null) {
                     e.printStackTrace();
                 }
             }
         }
         return response;
     }
-    /* Patient Enabiz Service Information End*/
+    /* Patient Enabiz Service Information End */
 }

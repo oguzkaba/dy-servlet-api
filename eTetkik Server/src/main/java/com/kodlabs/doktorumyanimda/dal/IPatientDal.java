@@ -23,84 +23,100 @@ import com.kodlabs.doktorumyanimda.model.user.UserPatient;
 import java.util.List;
 
 public interface IPatientDal {
-    ResponseEntitySet<List<PatientForAdmin>> getAllPatients() throws ConnectionException;
-    ResponseEntitySet<List<Patient>> getAllDoctorPatients(String doctorID) throws ConnectionException;
+        ResponseEntitySet<List<PatientForAdmin>> getAllPatients() throws ConnectionException;
 
-    ResponseEntitySet<String> updateVerifyCode(String phone, String verifyCode) throws ConnectionException;
-    ResponseEntitySet<String> create(String phone, String verifyCode) throws ConnectionException;
-    ResponseEntitySet<UserPatient> loginVerify(PatientLoginVerifyRequest request) throws ConnectionException;
+        ResponseEntitySet<List<Patient>> getAllDoctorPatients(String doctorID) throws ConnectionException;
 
-    ResponseEntitySet<Contact> contact(String phoneOrUserID) throws ConnectionException;
-    ResponseEntitySet<Patient> information(String patientID) throws ConnectionException;
+        ResponseEntitySet<String> updateVerifyCode(String phone, String verifyCode) throws ConnectionException;
 
-    ResponseEntity patientStatusUpdate(PatientStatusUpdateRequest request) throws ConnectionException;
-    ResponseEntitySet<String> patientGetStatus(String patientID) throws ConnectionException;
+        ResponseEntitySet<String> create(String phone, String verifyCode) throws ConnectionException;
 
-    ResponseEntitySet<List<Patient>> doctorOldPatients(String doctorID) throws ConnectionException;
+        ResponseEntitySet<UserPatient> loginVerify(PatientLoginVerifyRequest request) throws ConnectionException;
 
-    ResponseEntitySet<LoginData> loginV2(PatientLoginV2Request request, String verifyCode) throws ConnectionException;
+        ResponseEntitySet<Contact> contact(String phoneOrUserID) throws ConnectionException;
 
-    ResponseEntitySet<UserPatient> singUpV2(PatientSingUpV2Request request) throws ConnectionException;
+        ResponseEntitySet<Patient> information(String patientID) throws ConnectionException;
 
+        ResponseEntity patientStatusUpdate(PatientStatusUpdateRequest request) throws ConnectionException;
 
-    ResponseEntity inspectionDelete(String inspectionID) throws ConnectionException;
+        ResponseEntitySet<String> patientGetStatus(String patientID) throws ConnectionException;
 
-    boolean inspectionExists(String inspectionID) throws ConnectionException;
+        ResponseEntitySet<List<Patient>> doctorOldPatients(String doctorID) throws ConnectionException;
 
+        ResponseEntitySet<LoginData> loginV2(PatientLoginV2Request request, String verifyCode)
+                        throws ConnectionException;
 
-    ResponseEntitySet<List<Inspection>> inspectionList(String patientID, String doctorID) throws  ConnectionException;
+        ResponseEntitySet<UserPatient> singUpV2(PatientSingUpV2Request request) throws ConnectionException;
 
-    boolean inspectionContentExists(String contentID) throws ConnectionException;
+        ResponseEntity delete(String userID, byte role, String patientID) throws ConnectionException;
 
-    ResponseEntitySet<String> inspectionContentCreate(InspectionContent inspectionContent) throws ConnectionException;
+        ResponseEntity selfDelete(String userID) throws ConnectionException;
 
-    ResponseEntitySet<List<InspectionContent>> inspectionContentList(String inspectionID) throws ConnectionException;
+        ResponseEntity inspectionDelete(String inspectionID) throws ConnectionException;
 
-    ResponseEntity inspectionContentDelete(String inspectionContentID) throws ConnectionException;
+        boolean inspectionExists(String inspectionID) throws ConnectionException;
 
-    ResponseEntity inspectionContentUpdate(InspectionContent inspectionContent) throws ConnectionException;
+        ResponseEntitySet<List<Inspection>> inspectionList(String patientID, String doctorID)
+                        throws ConnectionException;
 
+        boolean inspectionContentExists(String contentID) throws ConnectionException;
 
-    /* Patient Notes */
+        ResponseEntitySet<String> inspectionContentCreate(InspectionContent inspectionContent)
+                        throws ConnectionException;
 
-    ResponseEntitySet<String> notesCreate(String patientID, String doctorID) throws ConnectionException;
+        ResponseEntitySet<List<InspectionContent>> inspectionContentList(String inspectionID)
+                        throws ConnectionException;
 
-    boolean noteExist(String patientID, String doctorID) throws ConnectionException;
-    ResponseEntitySet<String> notes(String patientID, String doctorID) throws ConnectionException;
+        ResponseEntity inspectionContentDelete(String inspectionContentID) throws ConnectionException;
 
-    ResponseEntitySet<PatientNotes> note(String patientID, String doctorID) throws ConnectionException;
+        ResponseEntity inspectionContentUpdate(InspectionContent inspectionContent) throws ConnectionException;
 
-    ResponseEntitySet<PatientNotesContent> noteContentCreate(PatientNotesContentCreateRequest request) throws ConnectionException;
+        /* Patient Notes */
 
-    ResponseEntity noteContentUpdate(PatientNotesContentUpdateRequest request) throws ConnectionException;
+        ResponseEntitySet<String> notesCreate(String patientID, String doctorID) throws ConnectionException;
 
-    ResponseEntitySet<List<PatientNotesContent>> noteContents(String noteID) throws ConnectionException;
+        boolean noteExist(String patientID, String doctorID) throws ConnectionException;
 
-    ResponseEntity noteContentDelete(String contentID) throws ConnectionException;
+        ResponseEntitySet<String> notes(String patientID, String doctorID) throws ConnectionException;
 
-    /* Patient Notes End */
+        ResponseEntitySet<PatientNotes> note(String patientID, String doctorID) throws ConnectionException;
 
-    /* Patient SysTakipNo */
-    boolean sysTakipNoExists(String tcNumber, String doctorID) throws ConnectionException;
-    boolean sysTakipNoExists(String sysTakipNo) throws ConnectionException;
+        ResponseEntitySet<PatientNotesContent> noteContentCreate(PatientNotesContentCreateRequest request)
+                        throws ConnectionException;
 
-    ResponseEntity sysTakipNoCreate(PatientSysTakipNoCreateRequest request) throws ConnectionException;
+        ResponseEntity noteContentUpdate(PatientNotesContentUpdateRequest request) throws ConnectionException;
 
-    ResponseEntity sysTakipNoUpdate(PatientSysTakipNoUpdateRequest request) throws ConnectionException;
-    ResponseEntitySet<List<PatientSysTakipNo>> sysTakipNoList(String doctorID) throws ConnectionException;
+        ResponseEntitySet<List<PatientNotesContent>> noteContents(String noteID) throws ConnectionException;
 
-    ResponseEntitySet<String> sysTakipNo(String tcNumber, String doctorID) throws ConnectionException;
+        ResponseEntity noteContentDelete(String contentID) throws ConnectionException;
 
-    /* Patient SysTakipNo End */
+        /* Patient Notes End */
 
-    /* Patient Enabiz Service Information*/
+        /* Patient SysTakipNo */
+        boolean sysTakipNoExists(String tcNumber, String doctorID) throws ConnectionException;
 
-    ResponseEntitySet<List<EnabizServiceInformation>> getEnabizServiceInformation(String sysTakipNo) throws ConnectionException;
+        boolean sysTakipNoExists(String sysTakipNo) throws ConnectionException;
 
-    ResponseEntity createEnabizServiceInformation(EnabizInformationServiceCreateRequest request) throws ConnectionException;
+        ResponseEntity sysTakipNoCreate(PatientSysTakipNoCreateRequest request) throws ConnectionException;
 
-    boolean existsEnabizServiceReferenceNumber(String serviceReferenceNumber) throws ConnectionException;
+        ResponseEntity sysTakipNoUpdate(PatientSysTakipNoUpdateRequest request) throws ConnectionException;
 
-    ResponseEntity deleteEnabizServiceInformation(String serviceReferenceNumber) throws ConnectionException;
+        ResponseEntitySet<List<PatientSysTakipNo>> sysTakipNoList(String doctorID) throws ConnectionException;
+
+        ResponseEntitySet<String> sysTakipNo(String tcNumber, String doctorID) throws ConnectionException;
+
+        /* Patient SysTakipNo End */
+
+        /* Patient Enabiz Service Information */
+
+        ResponseEntitySet<List<EnabizServiceInformation>> getEnabizServiceInformation(String sysTakipNo)
+                        throws ConnectionException;
+
+        ResponseEntity createEnabizServiceInformation(EnabizInformationServiceCreateRequest request)
+                        throws ConnectionException;
+
+        boolean existsEnabizServiceReferenceNumber(String serviceReferenceNumber) throws ConnectionException;
+
+        ResponseEntity deleteEnabizServiceInformation(String serviceReferenceNumber) throws ConnectionException;
 
 }

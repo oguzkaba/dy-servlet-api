@@ -22,41 +22,39 @@ import java.util.List;
 public class MysqlHealthFacilityDal implements IHealthFacilityDal {
     @Override
     public ResponseEntitySet<List<HealthFacility>> list() throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<List<HealthFacility>> response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL healthFacilityList() }");
             resultSet = statement.executeQuery();
             List<HealthFacility> facilities = new ArrayList<>();
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 facilities.add(
                         new HealthFacility(
-                              resultSet.getInt("id"),
-                              resultSet.getString("name"),
-                              resultSet.getString("description"),
-                              resultSet.getString("address"),
-                              resultSet.getString("phone"),
-                              resultSet.getInt("facilityID"),
-                              resultSet.getString("createDate")
-                        )
-                );
+                                resultSet.getInt("id"),
+                                resultSet.getString("name"),
+                                resultSet.getString("description"),
+                                resultSet.getString("address"),
+                                resultSet.getString("phone"),
+                                resultSet.getInt("facilityID"),
+                                resultSet.getString("createDate")));
             }
             response = new ResponseEntitySet<>(facilities);
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -65,32 +63,32 @@ public class MysqlHealthFacilityDal implements IHealthFacilityDal {
 
     @Override
     public boolean isExistsForId(int id) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         boolean result;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL heathFacilityExistsForId(?) }");
             statement.setInt(1, id);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 result = resultSet.getBoolean("result");
-            }else{
+            } else {
                 throw new ConnectionException(ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new ConnectionException(e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -99,32 +97,32 @@ public class MysqlHealthFacilityDal implements IHealthFacilityDal {
 
     @Override
     public boolean isExistsForName(String name) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         boolean result;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL heathFacilityExistsForName(?) }");
             statement.setString(1, name);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 result = resultSet.getBoolean("result");
-            }else{
+            } else {
                 throw new ConnectionException(ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new ConnectionException(e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -133,17 +131,17 @@ public class MysqlHealthFacilityDal implements IHealthFacilityDal {
 
     @Override
     public ResponseEntitySet<HealthFacilityDetail> detail(int id) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<HealthFacilityDetail> response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL heathFacilityDetail(?) }");
             statement.setInt(1, id);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 response = new ResponseEntitySet<>(
                         new HealthFacilityDetail(
                                 resultSet.getString("name"),
@@ -152,23 +150,21 @@ public class MysqlHealthFacilityDal implements IHealthFacilityDal {
                                 resultSet.getLong("tax_number"),
                                 resultSet.getString("phone"),
                                 resultSet.getInt("facilityID"),
-                                resultSet.getString("createDate")
-                        )
-                );
-            }else{
+                                resultSet.getString("createDate")));
+            } else {
                 response = new ResponseEntitySet<>(false, ErrorMessages.notFoundHealthFacility);
             }
-        }catch (SQLException  e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -177,32 +173,32 @@ public class MysqlHealthFacilityDal implements IHealthFacilityDal {
 
     @Override
     public boolean delete(int id) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         boolean result;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL healthFacilityDelete(?) }");
             statement.setInt(1, id);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 result = resultSet.getBoolean("result");
-            }else{
+            } else {
                 throw new SQLException(ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new ConnectionException(e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -211,13 +207,14 @@ public class MysqlHealthFacilityDal implements IHealthFacilityDal {
 
     @Override
     public ResponseEntity update(int id, HealthFacilityCU data) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResponseEntity response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("{ CALL healthFacilityUpdate(?, ?, ?, ?, ?, ?, ?) }");
+        try {
+            statement = MysqlConnection.getInstance()
+                    .prepareStatement("{ CALL healthFacilityUpdate(?, ?, ?, ?, ?, ?, ?) }");
             statement.setInt(1, id);
             statement.setString(2, data.getName());
             statement.setString(3, data.getDescription());
@@ -227,14 +224,14 @@ public class MysqlHealthFacilityDal implements IHealthFacilityDal {
             statement.setInt(7, data.getFacilityID());
             statement.execute();
             response = new ResponseEntity();
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntity(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -243,14 +240,15 @@ public class MysqlHealthFacilityDal implements IHealthFacilityDal {
 
     @Override
     public ResponseEntitySet<Integer> create(HealthFacilityCU data) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<Integer> response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("{ CALL healthFacilityCreate(?, ?, ?, ?, ?, ?) }");
+        try {
+            statement = MysqlConnection.getInstance()
+                    .prepareStatement("{ CALL healthFacilityCreate(?, ?, ?, ?, ?, ?) }");
             statement.setString(1, data.getName());
             statement.setString(2, data.getDescription());
             statement.setString(3, data.getAddress());
@@ -258,24 +256,23 @@ public class MysqlHealthFacilityDal implements IHealthFacilityDal {
             statement.setString(5, data.getPhone());
             statement.setInt(6, data.getFacilityID());
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 response = new ResponseEntitySet<>(
-                        resultSet.getInt("id")
-                );
-            }else{
+                        resultSet.getInt("id"));
+            } else {
                 response = new ResponseEntitySet<>(false, ErrorMessages.notCreateHealthFacility);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -284,42 +281,43 @@ public class MysqlHealthFacilityDal implements IHealthFacilityDal {
 
     @Override
     public ResponseEntity createHFAdmin(HFAdminCreate data) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntity response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("{ CALL healthFacilityAdminCreate(?, ?, ?, ?, ?, ?, ?) }");
+        try {
+            statement = MysqlConnection.getInstance()
+                    .prepareStatement("{ CALL healthFacilityAdminCreate(?, ?, ?, ?, ?, ?, ?) }");
             statement.setString(1, data.getUname());
-            statement.setString(2, Functions.toSHA1(data.getPassword()));
+            statement.setString(2, Functions.toSHA256(data.getPassword()));
             statement.setString(3, data.getName());
             statement.setString(4, data.getSurname());
             statement.setString(5, data.getEmail());
             statement.setString(6, data.getPhone());
             statement.setInt(7, data.getFacilityID());
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
-                if(resultSet.getBoolean("result")){
+            if (resultSet.next()) {
+                if (resultSet.getBoolean("result")) {
                     response = new ResponseEntity();
-                }else{
+                } else {
                     throw new SQLException(ErrorMessages.operationFailed);
                 }
-            }else{
+            } else {
                 throw new SQLException(ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntity(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -328,36 +326,36 @@ public class MysqlHealthFacilityDal implements IHealthFacilityDal {
 
     @Override
     public ResponseEntity deleteHFAdmin(String hcAdminID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntity response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL healthFacilityAdminDelete(?) }");
             statement.setString(1, hcAdminID);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
-                if(resultSet.getBoolean("result")){
+            if (resultSet.next()) {
+                if (resultSet.getBoolean("result")) {
                     response = new ResponseEntity();
-                }else{
+                } else {
                     throw new SQLException(ErrorMessages.operationFailed);
                 }
-            }else{
+            } else {
                 throw new SQLException(ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntity(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -366,17 +364,17 @@ public class MysqlHealthFacilityDal implements IHealthFacilityDal {
 
     @Override
     public ResponseEntitySet<List<HFAdminUser>> listHFAdmin() throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<List<HFAdminUser>> response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL healthFacilityAdminList() }");
             resultSet = statement.executeQuery();
             List<HFAdminUser> list = new ArrayList<>();
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 list.add(new HFAdminUser(
                         resultSet.getString("uname"),
                         resultSet.getString("name"),
@@ -384,21 +382,20 @@ public class MysqlHealthFacilityDal implements IHealthFacilityDal {
                         resultSet.getString("phone"),
                         resultSet.getString("email"),
                         resultSet.getInt("facilityID"),
-                        resultSet.getString("userID")
-                ));
+                        resultSet.getString("userID")));
             }
             response = new ResponseEntitySet<>(list);
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -407,17 +404,17 @@ public class MysqlHealthFacilityDal implements IHealthFacilityDal {
 
     @Override
     public ResponseEntitySet<HFAdminUser> detailHFAdmin(String hfAdminID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<HFAdminUser> response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL healthFacilityAdminDetail(?) }");
             statement.setString(1, hfAdminID);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 response = new ResponseEntitySet<>(
                         new HFAdminUser(
                                 resultSet.getString("uname"),
@@ -426,65 +423,64 @@ public class MysqlHealthFacilityDal implements IHealthFacilityDal {
                                 resultSet.getString("phone"),
                                 resultSet.getString("email"),
                                 resultSet.getInt("facilityID"),
-                                resultSet.getString("userID")
-                        )
-                );
-            }else{
+                                resultSet.getString("userID")));
+            } else {
                 throw new ConnectionException(ErrorMessages.notAccessHFAdminInformation);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
-        return  response;
+        return response;
     }
 
     @Override
     public ResponseEntity updateHFAdmin(String facilityAdminID, HFAdminBase data) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntity response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("{ CALL healthFacilityAdminUpdate(?, ?, ?, ?, ?) }");
+        try {
+            statement = MysqlConnection.getInstance()
+                    .prepareStatement("{ CALL healthFacilityAdminUpdate(?, ?, ?, ?, ?) }");
             statement.setString(1, facilityAdminID);
             statement.setString(2, data.getName());
             statement.setString(3, data.getSurname());
             statement.setString(4, data.getPhone());
             statement.setString(5, data.getEmail());
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
-                if(resultSet.getBoolean("result")){
+            if (resultSet.next()) {
+                if (resultSet.getBoolean("result")) {
                     response = new ResponseEntity();
-                }else{
+                } else {
                     throw new SQLException(ErrorMessages.operationFailed);
                 }
-            }else{
+            } else {
                 throw new SQLException(ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntity(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }

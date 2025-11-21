@@ -13,7 +13,6 @@ public final class Messages {
     public static final String bpVeryLow = "çok düşük çıkmıştır.";
     public static final String bpVeryHigh = "çok yüksek çıkmıştır.";
 
-
     public static final String mailVerification = "Mail Doğrulama";
 
     public static final String messageYourFromDoctor = "Doktorunuzdan mesajınız var.";
@@ -36,4 +35,8 @@ public final class Messages {
     public static final String passwordForgotCodeVerifyMessage = "%s kodunu Doktorum Yanimda uygulamasinda kullanarak sifrenizi yenileyebilirsiniz.";
 
     public static final String passwordReset = "Şifre Sıfırlama";
+
+    // Test new account message
+    public static final String newAccountTitle = "Yeni Hesap Bilgilendirme";
+    public static final String newAccountMessage = "Doktorum Yanımda ailesine katıldığınız için teşekkür ederiz. Hesabınız başarıyla oluşturulmuştur.";
 }

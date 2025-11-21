@@ -49,6 +49,8 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.servlet.http.HttpServletRequest;
+
 public class DoctorManager {
     private final IDoctorDal doctorDal;
 
@@ -104,22 +106,24 @@ public class DoctorManager {
         }
     }
 
-    public ResponseEntitySet<String> loginV2(DoctorLoginV2Request request, String ip) {
+    public ResponseEntitySet<String> loginV2(DoctorLoginV2Request request, HttpServletRequest hsr) {
         if (!request.isValid()) {
             return new ResponseEntitySet<>(false, ErrorMessages.inValidData);
         }
         switch (LoginType.getInstance(request.getType())) {
             case TC_NUMBER:
                 if (!Patterns.TC_NO.matcher(request.getUname()).matches()) {
-                    doctorLogSend("loginV2", request.getUname(), ip,
-                            LogEventDescription.LOGIN_INVALID_TC_UNAME.getMessage());
+                    doctorLogSend("loginV2", request.getUname(), Functions.getClientIpAddress(hsr),
+                            Functions.getBrowserOrDevice(hsr),
+                            LogEventDescription.LOGIN_INVALID_TC_UNAME.getMessage(), Role.DOCTOR);
                     return new ResponseEntitySet<>(false, ErrorMessages.inValidTcNumber);
                 }
                 break;
             case PHONE:
                 if (!Patterns.PHONE.matcher(request.getUname()).matches()) {
-                    doctorLogSend("loginV2", request.getUname(), ip,
-                            LogEventDescription.LOGIN_INVALID_PHONE_UNAME.getMessage());
+                    doctorLogSend("loginV2", request.getUname(), Functions.getClientIpAddress(hsr),
+                            Functions.getBrowserOrDevice(hsr),
+                            LogEventDescription.LOGIN_INVALID_PHONE_UNAME.getMessage(), Role.DOCTOR);
                     return new ResponseEntitySet<>(false, ErrorMessages.inValidPhone);
                 }
                 break;
@@ -152,14 +156,17 @@ public class DoctorManager {
                         return new ResponseEntitySet<>(loginData.getPhone());
                     }
                 } else {
-                    doctorLogSend("loginV2", request.getUname(), ip, LogEventDescription.LOGIN_FAILED.getMessage());
+                    doctorLogSend("loginV2", request.getUname(), Functions.getClientIpAddress(hsr),
+                            Functions.getBrowserOrDevice(hsr), LogEventDescription.LOGIN_FAILED.getMessage(),
+                            Role.DOCTOR);
                 }
                 return new ResponseEntitySet<>(false, response.errorCode, response.message);
             } else {
                 return new ResponseEntitySet<>(false, "contract_accept#".concat(String.valueOf(result)));
             }
         } catch (ConnectionException | SQLException | NullPointerException e) {
-            doctorLogSend("loginV2", request.getUname(), ip, LogEventDescription.LOGIN_FAILED.getMessage());
+            doctorLogSend("loginV2", request.getUname(), Functions.getClientIpAddress(hsr),
+                    Functions.getBrowserOrDevice(hsr), LogEventDescription.LOGIN_FAILED.getMessage(), Role.DOCTOR);
             return new ResponseEntitySet<>(false, e.getLocalizedMessage());
         }
     }
@@ -216,17 +223,19 @@ public class DoctorManager {
         }
     }
 
-    public ResponseEntitySet<UserDoctor> loginVerify(DoctorLoginVerifyRequest request, String ip) {
+    public ResponseEntitySet<UserDoctor> loginVerify(DoctorLoginVerifyRequest request, HttpServletRequest hsr) {
         if (!request.isValid()) {
             return new ResponseEntitySet<>(false, ErrorMessages.inValidData);
         }
         try {
             ResponseEntitySet<UserDoctor> response = this.doctorDal.loginVerify(request);
             if (response.isSuccess) {
-                doctorLogSend("loginVerify", request.getPhone(), ip, LogEventDescription.LOGIN.getMessage());
+                doctorLogSend("loginVerify", request.getPhone(), Functions.getClientIpAddress(hsr),
+                        Functions.getBrowserOrDevice(hsr), LogEventDescription.LOGIN.getMessage(), Role.DOCTOR);
             } else {
-                doctorLogSend("loginVerify", request.getPhone(), ip,
-                        LogEventDescription.LOGIN_VERIFY_FAILED.getMessage());
+                doctorLogSend("loginVerify", request.getPhone(), Functions.getClientIpAddress(hsr),
+                        Functions.getBrowserOrDevice(hsr),
+                        LogEventDescription.LOGIN_VERIFY_FAILED.getMessage(), Role.DOCTOR);
             }
             return response;
         } catch (ConnectionException e) {
@@ -234,7 +243,7 @@ public class DoctorManager {
         }
     }
 
-    public ResponseEntity register(DoctorRegister request, String ip) {
+    public ResponseEntity register(DoctorRegister request, HttpServletRequest hsr) {
         if (!request.isValid()) {
             return new ResponseEntity(false, ErrorMessages.inValidData);
         }
@@ -264,9 +273,11 @@ public class DoctorManager {
             ResponseEntity response = this.doctorDal.register(request);
             if (response.isSuccess) {
                 String fullName = Managers.userManager.getFullName(request.getAdminID(), Role.ADMIN.value());
-                doctorLogSend("register", request.getTcNumber(), ip,
+                doctorLogSend("register", request.getTcNumber(), Functions.getClientIpAddress(hsr),
+                        Functions.getBrowserOrDevice(hsr),
                         String.format(LogEventDescription.SING_UP_FOR_ADMIN.getMessage(),
-                                TextUtils.isEmpty(fullName) ? request.getAdminID() : fullName));
+                                TextUtils.isEmpty(fullName) ? request.getAdminID() : fullName),
+                        Role.ADMIN);
             }
             return response;
         } catch (ConnectionException | NullPointerException e) {
@@ -579,15 +590,16 @@ public class DoctorManager {
         return this.doctorDal.isContractAccepted(doctorID);
     }
 
-    public ResponseEntity contractAccept(ContractAcceptRequest request, String ip) {
+    public ResponseEntity contractAccept(ContractAcceptRequest request, HttpServletRequest hsr) {
         if (request.isValid()) {
             return new ResponseEntity(false, ErrorMessages.inValidData);
         }
         try {
             ResponseEntity response = this.doctorDal.contractAccept(request.getPhone());
             if (response.isSuccess) {
-                doctorLogSend("contractAccept", request.getPhone(), ip,
-                        LogEventDescription.ACCEPT_CONTRACT.getMessage());
+                doctorLogSend("contractAccept", request.getPhone(), Functions.getClientIpAddress(hsr),
+                        Functions.getBrowserOrDevice(hsr),
+                        LogEventDescription.ACCEPT_CONTRACT.getMessage(), Role.DOCTOR);
                 return Managers.doctorManager.newVerifyCode(request.getPhone(), request.getDeviceID());
             }
             return response;
@@ -615,7 +627,7 @@ public class DoctorManager {
         }
     }
 
-    public ResponseEntity delete(String userID, Byte role, String doctorID, String ip) {
+    public ResponseEntity delete(String userID, Byte role, String doctorID, HttpServletRequest hsr) {
         if (TextUtils.isEmpty(userID) || TextUtils.isEmpty(doctorID) || role == null
                 || !(role == Role.ADMIN.value() || role == Role.FACILITY_ADMIN.value())) {
             return new ResponseEntity(false, ErrorMessages.inValidData);
@@ -623,12 +635,27 @@ public class DoctorManager {
         try {
             if (Managers.userManager.isExistsUser(userID, role)) {
                 if (Managers.userManager.isExistsUser(doctorID, Role.DOCTOR.value())) {
-                    ResponseEntity response = this.doctorDal.delete(userID, role, doctorID);
                     String fullName = Managers.userManager.getFullName(userID, role);
-                    doctorLogSend("delete", doctorID, ip,
-                            String.format(LogEventDescription.ACCOUNT_DELETE_FOR_ADMIN.getMessage(),
-                                    TextUtils.isEmpty(fullName) ? userID : fullName));
-                    return response;
+                    String doctorFullName = Managers.userManager.getFullName(doctorID, Role.DOCTOR.value());
+                    ResponseEntity response = this.doctorDal.delete(userID, role, doctorID);
+                    if (response.isSuccess) {
+                        doctorLogSend("delete", doctorID, Functions.getClientIpAddress(hsr),
+                                Functions.getBrowserOrDevice(hsr),
+                                String.format(LogEventDescription.ACCOUNT_DELETE_FOR_ADMIN.getMessage(),
+                                        TextUtils.isEmpty(fullName) ? userID : fullName,
+                                        TextUtils.isEmpty(doctorFullName) ? doctorID : doctorFullName),
+                                Role.ADMIN);
+                        return response;
+                    } else {
+                        doctorLogSend("delete", doctorID, Functions.getClientIpAddress(hsr),
+                                Functions.getBrowserOrDevice(hsr),
+                                String.format(LogEventDescription.ACCOUNT_DELETE_FAILED_FOR_ADMIN.getMessage(),
+                                        TextUtils.isEmpty(fullName) ? userID : fullName,
+                                        TextUtils.isEmpty(doctorFullName) ? doctorID : doctorFullName),
+                                Role.ADMIN);
+                        return new ResponseEntity(false, ErrorMessages.operationFailed);
+
+                    }
                 } else {
                     return new ResponseEntity(false, ErrorMessages.notAccessDoctorInformation);
                 }
@@ -661,7 +688,7 @@ public class DoctorManager {
         }
     }
 
-    public ResponseEntity updateSideAdmin(DoctorUpdateSideAdminRequest request, String ip) {
+    public ResponseEntity updateSideAdmin(DoctorUpdateSideAdminRequest request, HttpServletRequest hsr) {
         if (!request.isValid()) {
             return new ResponseEntity(false, ErrorMessages.inValidData);
         }
@@ -680,9 +707,11 @@ public class DoctorManager {
                     String fullName = Managers.userManager.getFullName(request.getUserID(),
                             AdminRole.getUserRole(request.getType()));
                     if (response.isSuccess) {
-                        doctorLogSend("updateSideAdmin", request.getProfile().getDoctorID(), ip,
+                        doctorLogSend("updateSideAdmin", request.getProfile().getDoctorID(),
+                                Functions.getClientIpAddress(hsr), Functions.getBrowserOrDevice(hsr),
                                 String.format(LogEventDescription.ACCOUNT_UPDATE_FOR_ADMIN.getMessage(),
-                                        TextUtils.isEmpty(fullName) ? request.getUserID() : fullName));
+                                        TextUtils.isEmpty(fullName) ? request.getUserID() : fullName),
+                                Role.ADMIN);
                     }
                     return response;
                 } else {
@@ -729,7 +758,7 @@ public class DoctorManager {
         }
         try {
             if (!NVIService.getInstance().verifyNvi(request)) {
-                return new ResponseEntitySet<>(false, ErrorMessages.notVerifyUserIdentity);
+                return new ResponseEntitySet<>(false, "Hata: Bir hata oluştu, Lütfen tekrar deneyiniz.");
             }
             CkysTahilBilgisiResponse response = CkysService.getInstance().tahilBilgisiSorgula(request.getTcNumber(),
                     request.getRegistrationNo(), request.getSerialNo());
@@ -768,7 +797,8 @@ public class DoctorManager {
         }
     }
 
-    private void doctorLogSend(String methodName, String phoneOrUserID, String ip, String eventDescription) {
+    private void doctorLogSend(String methodName, String phoneOrUserID, String ip, String browserOrDevice,
+            String eventDescription, Role role) {
         new Thread(() -> {
             try {
                 Managers.logManager.create(
@@ -777,10 +807,11 @@ public class DoctorManager {
                                 DoctorManager.class.getSimpleName(),
                                 methodName,
                                 phoneOrUserID,
-                                Role.DOCTOR.value(),
+                                role.value(),
                                 ip,
                                 Functions.getIpAddress(),
-                                eventDescription));
+                                eventDescription,
+                                browserOrDevice));
             } catch (UnknownHostException e) {
                 System.out.println(e.getLocalizedMessage());
             }

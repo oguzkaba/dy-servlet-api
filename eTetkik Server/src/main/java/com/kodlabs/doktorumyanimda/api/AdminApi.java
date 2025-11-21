@@ -25,13 +25,16 @@ import javax.ws.rs.core.Response;
 public class AdminApi {
     @POST
     @Path("/login")
-    public ResponseEntity login(AdminLoginRequest request){
+    public ResponseEntity login(AdminLoginRequest request) {
         ResponseEntitySet<LoginData> response = Managers.adminManager.login(request);
-        if(response.isSuccess){
-            IIntegrations integration = IntegrationsFactory.getIntegrations(new SmsData(String.format(Messages.smsLoginVerifyMessage, response.getData().getCode()), response.getData().getPhone()), IntegrationsFactory.SMS);
-            if(integration != null){
+        if (response.isSuccess) {
+            IIntegrations integration = IntegrationsFactory.getIntegrations(
+                    new SmsData(String.format(Messages.smsLoginVerifyMessage, response.getData().getCode()),
+                            response.getData().getPhone()),
+                    IntegrationsFactory.SMS);
+            if (integration != null) {
                 boolean result = integration.sendMessage();
-                if(!result){
+                if (!result) {
                     return new ResponseEntity(false, ErrorMessages.operationFailed);
                 }
                 return new ResponseEntity();
@@ -42,9 +45,9 @@ public class AdminApi {
 
     @POST
     @Path("/login/code/verify")
-    public Response loginVerifyCode(@Context HttpServletRequest hsr, AdminLoginVerifyRequest request){
-        if(request.isValid()){
-            return Response.ok().entity(Managers.adminManager.verifyCode(request, Functions.getClientIpAddress(hsr))).build();
+    public Response loginVerifyCode(@Context HttpServletRequest hsr, AdminLoginVerifyRequest request) {
+        if (request.isValid()) {
+            return Response.ok().entity(Managers.adminManager.verifyCode(request, hsr)).build();
         }
         return Response.serverError().entity(ErrorMessages.inValidData).build();
     }

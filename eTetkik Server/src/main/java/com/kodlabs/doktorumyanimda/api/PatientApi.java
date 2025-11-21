@@ -30,9 +30,11 @@ import com.kodlabs.doktorumyanimda.model.user.UserPatient;
 import com.kodlabs.doktorumyanimda.model.user.profile.PatientProfile;
 import com.kodlabs.doktorumyanimda.model.user.profile.PatientProfileUpdateV2;
 import com.kodlabs.doktorumyanimda.model.user.profile.ProfileUpdateRequest;
+import com.kodlabs.doktorumyanimda.utils.AdminRole;
 import com.kodlabs.doktorumyanimda.utils.Common;
 import com.kodlabs.doktorumyanimda.utils.Functions;
 import com.kodlabs.doktorumyanimda.utils.Phones;
+import com.kodlabs.doktorumyanimda.utils.Role;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -50,35 +52,39 @@ import java.util.stream.Collectors;
 public class PatientApi {
     @POST
     @Path("/login")
-    public ResponseEntity login(PatientLoginRequest request){
+    public ResponseEntity login(PatientLoginRequest request) {
         ResponseEntitySet<String> response = Managers.patientManager.login(request);
-        if(!Common.isLocal && response.isSuccess && !Phones.isContains(request.getUname(), false)){
-            if(response.isSuccess){
-                ResponseEntity smsResponse = SmsUtils.loginVerify(request.getUname(), request.getDeviceID(), response.getData());
-                if(!smsResponse.isSuccess){
+        if (!Common.isLocal && response.isSuccess && !Phones.isContains(request.getUname(), false)) {
+            if (response.isSuccess) {
+                ResponseEntity smsResponse = SmsUtils.loginVerify(request.getUname(), request.getDeviceID(),
+                        response.getData());
+                if (!smsResponse.isSuccess) {
                     return smsResponse;
                 }
             }
         }
         return response;
     }
+
     @POST
     @Path("/register")
-    public ResponseEntity register(PatientRegisterRequest request){
+    public ResponseEntity register(PatientRegisterRequest request) {
         ResponseEntitySet<String> response = Managers.patientManager.create(request);
-        if(!Common.isLocal && response.isSuccess && !Phones.isContains(request.getPhone(), false)){
-            if(response.isSuccess){
-                ResponseEntity smsResponse = SmsUtils.loginVerify(request.getPhone(), request.getDeviceID(), response.getData());
-                if(!smsResponse.isSuccess){
+        if (!Common.isLocal && response.isSuccess && !Phones.isContains(request.getPhone(), false)) {
+            if (response.isSuccess) {
+                ResponseEntity smsResponse = SmsUtils.loginVerify(request.getPhone(), request.getDeviceID(),
+                        response.getData());
+                if (!smsResponse.isSuccess) {
                     return smsResponse;
                 }
-                new Thread(()->{
+                new Thread(() -> {
                     Map<String, Object> info = new HashMap<>();
                     String phone = request.getPhone().trim();
                     String dialCode = phone.substring(0, phone.length() - 10);
                     info.put("CountryCode", dialCode.replace("+", ""));
-                    IEvents events = EventsFactory.getEvents(new AzureEventsEntity(EventsType.NEW_USER_EVENTS, "NewUser", info));
-                    if(events != null){
+                    IEvents events = EventsFactory
+                            .getEvents(new AzureEventsEntity(EventsType.NEW_USER_EVENTS, "NewUser", info));
+                    if (events != null) {
                         events.insert();
                     }
                 }).start();
@@ -86,90 +92,115 @@ public class PatientApi {
         }
         return response;
     }
+
     @POST
     @Path("/login/verify")
-    public ResponseEntitySet<UserPatient> loginVerify(@Context HttpServletRequest hsr, PatientLoginVerifyRequest request){
-        return Managers.patientManager.loginVerify(request, Functions.getClientIpAddress(hsr));
+    public ResponseEntitySet<UserPatient> loginVerify(@Context HttpServletRequest hsr,
+            PatientLoginVerifyRequest request) {
+        return Managers.patientManager.loginVerify(request, hsr);
     }
 
     @GET
     @Path("/login/verify/new")
-    public ResponseEntity newLoginVerifyCode(@QueryParam("phone") String phone, @QueryParam("deviceID")String deviceID){
-       return Managers.patientManager.newVerifyCode(phone, deviceID, Functions.generateCode());
+    public ResponseEntity newLoginVerifyCode(@QueryParam("phone") String phone,
+            @QueryParam("deviceID") String deviceID) {
+        return Managers.patientManager.newVerifyCode(phone, deviceID, Functions.generateCode());
     }
+
     @POST
     @Path("/v2/login")
-    public ResponseEntitySet<String> loginV2(@Context HttpServletRequest hsr,  PatientLoginV2Request request){
-        return Managers.patientManager.loginV2(request, Functions.getClientIpAddress(hsr));
+    public ResponseEntitySet<String> loginV2(@Context HttpServletRequest hsr, PatientLoginV2Request request) {
+        return Managers.patientManager.loginV2(request, hsr);
     }
+
     @Path("/singup")
     @POST
-    public ResponseEntitySet<UserPatient> singUp(@Context HttpServletRequest hsr, PatientSingUpV2Request request){
-        return Managers.patientManager.singUpV2(request, Functions.getClientIpAddress(hsr));
+    public ResponseEntitySet<UserPatient> singUp(@Context HttpServletRequest hsr, PatientSingUpV2Request request) {
+        return Managers.patientManager.singUpV2(request, hsr);
+    }
+
+    // Admin & Facility Admin Patient Delete
+    @Path("/{patientID}/delete")
+    @DELETE
+    public ResponseEntity delete(@Context HttpServletRequest hsr, @QueryParam("userID") String userID,
+            @QueryParam("type") String type, @PathParam("patientID") String patientID) {
+        return Managers.patientManager.delete(userID, AdminRole.getUserRole(type), patientID, hsr);
+    }
+
+    // Patient Self Delete
+    @Path("/self/delete")
+    @DELETE
+    public ResponseEntity selfDelete(@Context HttpServletRequest hsr, @QueryParam("userID") String userID) {
+        return Managers.patientManager.selfDelete(userID, hsr);
     }
 
     @Path("/list/for/doctor")
     @GET
-    public ResponseEntitySet<List<Patient>> getAllDoctorPatients(@QueryParam("doctorID")String doctorID){
+    public ResponseEntitySet<List<Patient>> getAllDoctorPatients(@QueryParam("doctorID") String doctorID) {
         return Managers.patientManager.getAllDoctorPatient(doctorID);
     }
+
     @Path("/list/old")
     @GET
-    public ResponseEntitySet<List<Patient>> doctorOldPatients(@QueryParam("doctorID")String doctorID){
+    public ResponseEntitySet<List<Patient>> doctorOldPatients(@QueryParam("doctorID") String doctorID) {
         return Managers.patientManager.doctorOldPatients(doctorID);
     }
+
     @Path("/list")
     @GET
-    public ResponseEntitySet<List<PatientForAdminDTO>> getAllPatients(@QueryParam("userID")String userID){
+    public ResponseEntitySet<List<PatientForAdminDTO>> getAllPatients(@QueryParam("userID") String userID) {
         ResponseEntitySet<List<PatientForAdmin>> response = Managers.patientManager.getAllPatient(userID);
-        if(response.isSuccess){
-            List<PatientForAdminDTO> patients = response.getData().stream().map(v -> ModelMapper.getInstance().map(v, PatientForAdminDTO.class)).collect(Collectors.toList());
+        if (response.isSuccess) {
+            List<PatientForAdminDTO> patients = response.getData().stream()
+                    .map(v -> ModelMapper.getInstance().map(v, PatientForAdminDTO.class)).collect(Collectors.toList());
             return new ResponseEntitySet<>(patients);
-        }else{
+        } else {
             return new ResponseEntitySet<>(false, response.message);
         }
     }
 
     @GET
     @Path("/profile")
-    public ResponseEntitySet<PatientProfile> profile(@QueryParam("userID")String userID){
+    public ResponseEntitySet<PatientProfile> profile(@QueryParam("userID") String userID) {
         return Managers.patientProfileManager.profile(userID);
     }
 
     @POST
     @Path("/profile/update")
-    public ResponseEntity profileUpdate(@Context HttpServletRequest hsr, ProfileUpdateRequest<PatientProfile> request){
-        return Managers.patientProfileManager.update(request, Functions.getClientIpAddress(hsr));
+    public ResponseEntity profileUpdate(@Context HttpServletRequest hsr, ProfileUpdateRequest<PatientProfile> request) {
+        return Managers.patientProfileManager.update(request, hsr);
     }
-
 
     @PUT
     @Path("/{patientID}/profile/update")
-    public ResponseEntity profileV2Update(@PathParam("patientID")String patientID, @Context HttpServletRequest hsr, PatientProfileUpdateV2 profile){
-        return Managers.patientProfileManager.updateV2(patientID, profile, Functions.getClientIpAddress(hsr));
+    public ResponseEntity profileV2Update(@PathParam("patientID") String patientID, @Context HttpServletRequest hsr,
+            PatientProfileUpdateV2 profile) {
+        return Managers.patientProfileManager.updateV2(patientID, profile, hsr);
     }
 
     @GET
     @Path("/profile/exists")
-    public ResponseEntitySet<Boolean> profileExists(@QueryParam("userID")String userID){
+    public ResponseEntitySet<Boolean> profileExists(@QueryParam("userID") String userID) {
         return Managers.patientProfileManager.existsProfile(userID);
     }
 
     @Path("/information")
     @GET
-    public ResponseEntitySet<Patient> information(@QueryParam("patientID") String patientID){
+    public ResponseEntitySet<Patient> information(@QueryParam("patientID") String patientID) {
         return Managers.patientManager.information(patientID);
     }
 
     /* Patient Status */
     @Path("/{patientID}/status/{fieldName}/update")
     @PUT
-    public ResponseEntity patientStatusUpdate(@PathParam("patientID")String patientID, @PathParam("fieldName")String fieldName, @QueryParam("value")Boolean value){
+    public ResponseEntity patientStatusUpdate(@PathParam("patientID") String patientID,
+            @PathParam("fieldName") String fieldName, @QueryParam("value") Boolean value) {
         return Managers.patientManager.patientStatusUpdate(new PatientStatusUpdateRequest(patientID, fieldName, value));
     }
+
     @Path("/status")
     @GET
-    public ResponseEntitySet<String> patientGetStatus(@QueryParam("patientID")String patientID){
+    public ResponseEntitySet<String> patientGetStatus(@QueryParam("patientID") String patientID) {
         return Managers.patientManager.patientGetStatus(patientID);
     }
     /* End */
@@ -177,70 +208,76 @@ public class PatientApi {
     /* Inspection */
     @Path("/{patientID}/inspection/list")
     @GET
-    public ResponseEntitySet<List<Inspection>> patientInspectionList(@PathParam("patientID")String patientID, @QueryParam("doctorID")String doctorID){
+    public ResponseEntitySet<List<Inspection>> patientInspectionList(@PathParam("patientID") String patientID,
+            @QueryParam("doctorID") String doctorID) {
         return Managers.patientManager.patientInspectionList(patientID, doctorID);
     }
 
     @Path("/inspection/{id}")
     @DELETE
-    public ResponseEntity inspectionDelete(@PathParam("id")String id){
+    public ResponseEntity inspectionDelete(@PathParam("id") String id) {
         return Managers.patientManager.inspectionDelete(id);
     }
 
     @Path("/inspection/{id}/content/list")
     @GET
-    public ResponseEntitySet<List<InspectionContent>> inspectionContentList(@PathParam("id")String id){
+    public ResponseEntitySet<List<InspectionContent>> inspectionContentList(@PathParam("id") String id) {
         return Managers.patientManager.inspectionContentList(id);
     }
 
     @Path("/inspection/content")
     @POST
-    public ResponseEntity inspectionContentCreate(@Context HttpServletRequest hsr, InspectionContent inspectionContent){
-        return Managers.patientManager.inspectionContentCreate(Functions.getClientIpAddress(hsr), inspectionContent);
+    public ResponseEntity inspectionContentCreate(@Context HttpServletRequest hsr,
+            InspectionContent inspectionContent) {
+        return Managers.patientManager.inspectionContentCreate(hsr, inspectionContent);
     }
 
     @Path("/inspection/content/update")
     @POST
-    public ResponseEntity inspectionContentUpdate(@Context HttpServletRequest hsr, InspectionContent inspectionContent){
-        return Managers.patientManager.inspectionContentUpdate(Functions.getClientIpAddress(hsr), inspectionContent);
+    public ResponseEntity inspectionContentUpdate(@Context HttpServletRequest hsr,
+            InspectionContent inspectionContent) {
+        return Managers.patientManager.inspectionContentUpdate(hsr, inspectionContent);
     }
 
     @Path("/inspection/content/{contentID}")
     @DELETE
-    public ResponseEntity inspectionContentDelete(@Context HttpServletRequest hsr, @PathParam("contentID")String contentID){
-        return Managers.patientManager.inspectionContentDelete(Functions.getClientIpAddress(hsr), contentID);
+    public ResponseEntity inspectionContentDelete(@Context HttpServletRequest hsr,
+            @PathParam("contentID") String contentID) {
+        return Managers.patientManager.inspectionContentDelete(hsr, contentID);
     }
     /* End */
-
 
     /* Patient Notes */
     @Path("/{patientID}/note")
     @GET
-    public ResponseEntitySet<String> notes(@Context HttpServletRequest hsr, @PathParam("patientID") String patientID, @QueryParam("doctorID")String doctorID){
+    public ResponseEntitySet<String> notes(@Context HttpServletRequest hsr, @PathParam("patientID") String patientID,
+            @QueryParam("doctorID") String doctorID) {
         return Managers.patientManager.notesCreate(patientID, doctorID);
     }
 
     @Path("/note/{noteID}/content/list")
     @GET
-    public ResponseEntitySet<List<PatientNotesContent>> noteContents(@Context HttpServletRequest hsr, @PathParam("noteID")String noteID){
+    public ResponseEntitySet<List<PatientNotesContent>> noteContents(@Context HttpServletRequest hsr,
+            @PathParam("noteID") String noteID) {
         return Managers.patientManager.noteContents(noteID);
     }
 
     @Path("/note/content")
     @POST
-    public ResponseEntitySet<PatientNotesContent> noteContentCreate(@Context HttpServletRequest hsr, PatientNotesContentCreateRequest request){
+    public ResponseEntitySet<PatientNotesContent> noteContentCreate(@Context HttpServletRequest hsr,
+            PatientNotesContentCreateRequest request) {
         return Managers.patientManager.noteContentCreate(request);
     }
 
     @Path("/note/content/update")
     @POST
-    public ResponseEntity noteContentUpdate(@Context HttpServletRequest hsr, PatientNotesContentUpdateRequest request){
+    public ResponseEntity noteContentUpdate(@Context HttpServletRequest hsr, PatientNotesContentUpdateRequest request) {
         return Managers.patientManager.noteContentUpdate(request);
     }
 
     @Path("/note/content/{contentID}")
     @DELETE
-    public ResponseEntity noteContentDelete(@Context HttpServletRequest hsr, @PathParam("contentID")String contentID){
+    public ResponseEntity noteContentDelete(@Context HttpServletRequest hsr, @PathParam("contentID") String contentID) {
         return Managers.patientManager.noteContentDelete(contentID);
     }
     /* Patient Notes End */
@@ -248,9 +285,9 @@ public class PatientApi {
     /* Patient SysTakipNo */
     @Path("/systakipno/list")
     @GET
-    public ResponseEntitySet<List<PatientSysTakipNoDTO>> sysTakipNoList(@QueryParam("doctorID")String doctorID){
+    public ResponseEntitySet<List<PatientSysTakipNoDTO>> sysTakipNoList(@QueryParam("doctorID") String doctorID) {
         ResponseEntitySet<List<PatientSysTakipNo>> response = Managers.patientManager.sysTakipNoList(doctorID);
-        if(response.isSuccess){
+        if (response.isSuccess) {
             return new ResponseEntitySet<>(
                     response.getData().stream()
                             .map(k -> ModelMapper.getInstance().map(k, PatientSysTakipNoDTO.class))
@@ -263,50 +300,56 @@ public class PatientApi {
 
     @Path("/systakipno")
     @GET
-    public ResponseEntitySet<String> sysTakipNoGet(@QueryParam("tcNumber")String tcNumber, @QueryParam("doctorID")String doctorID){
+    public ResponseEntitySet<String> sysTakipNoGet(@QueryParam("tcNumber") String tcNumber,
+            @QueryParam("doctorID") String doctorID) {
         return Managers.patientManager.sysTakipNo(tcNumber, doctorID);
     }
+
     @Path("/systakipno")
     @POST
-    public ResponseEntity sysTakipNoCreate(@Context HttpServletRequest hsr, PatientSysTakipNoCreateRequest request){
-       return Managers.patientManager.sysTakipNoCreate(Functions.getClientIpAddress(hsr), request);
+    public ResponseEntity sysTakipNoCreate(@Context HttpServletRequest hsr, PatientSysTakipNoCreateRequest request) {
+        return Managers.patientManager.sysTakipNoCreate(hsr, request);
     }
 
     @Path("/systakipno/update")
     @POST
-    public ResponseEntity sysTakipNoUpdate(@Context HttpServletRequest hsr, PatientSysTakipNoUpdateRequest request){
-        return Managers.patientManager.sysTakipNoUpdate(Functions.getClientIpAddress(hsr), request);
+    public ResponseEntity sysTakipNoUpdate(@Context HttpServletRequest hsr, PatientSysTakipNoUpdateRequest request) {
+        return Managers.patientManager.sysTakipNoUpdate(hsr, request);
     }
-    /* Patient SysTakipNo End*/
+    /* Patient SysTakipNo End */
 
-    /* Patient Enabiz Hizmet Bilgisi*/
+    /* Patient Enabiz Hizmet Bilgisi */
     @Path("/enabiz/service/information")
     @GET
-    public ResponseEntitySet<List<EnabizServiceInformationDTO>> getEnabizServiceInformation(@QueryParam("sysTakipNo")String sysTakipNo){
-        ResponseEntitySet<List<EnabizServiceInformation>> response = Managers.patientManager.getEnabizServiceInformation(sysTakipNo);
-        if(response.isSuccess){
+    public ResponseEntitySet<List<EnabizServiceInformationDTO>> getEnabizServiceInformation(
+            @QueryParam("sysTakipNo") String sysTakipNo) {
+        ResponseEntitySet<List<EnabizServiceInformation>> response = Managers.patientManager
+                .getEnabizServiceInformation(sysTakipNo);
+        if (response.isSuccess) {
             List<EnabizServiceInformationDTO> newData = new ArrayList<>();
-            if(response.getData() == null){
+            if (response.getData() == null) {
                 return new ResponseEntitySet<>(newData);
-            }else{
+            } else {
                 newData = response.getData().stream()
                         .map(data -> ModelMapper.getInstance().map(data, EnabizServiceInformationDTO.class))
                         .collect(Collectors.toList());
                 return new ResponseEntitySet<>(newData);
             }
-        }else{
+        } else {
             return new ResponseEntitySet<>(false, response.errorCode, response.message);
         }
     }
+
     @Path("/enabiz/service/information")
     @POST
-    public ResponseEntity createEnabizServiceInformation(EnabizInformationServiceCreateRequest request){
+    public ResponseEntity createEnabizServiceInformation(EnabizInformationServiceCreateRequest request) {
         return Managers.patientManager.createEnabizServiceInformation(request);
     }
 
     @Path("/enabiz/service/information/{service_reference_number}")
     @DELETE
-    public ResponseEntity deleteEnabizServiceInformation(@PathParam("service_reference_number")String serviceReferenceNumber){
+    public ResponseEntity deleteEnabizServiceInformation(
+            @PathParam("service_reference_number") String serviceReferenceNumber) {
         return Managers.patientManager.deleteEnabizServiceInformation(serviceReferenceNumber);
     }
 }

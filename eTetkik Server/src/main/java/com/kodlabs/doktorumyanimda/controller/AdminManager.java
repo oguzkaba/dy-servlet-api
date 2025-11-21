@@ -16,77 +16,82 @@ import com.kodlabs.doktorumyanimda.utils.TextUtils;
 
 import java.net.UnknownHostException;
 
+import javax.servlet.http.HttpServletRequest;
+
 public class AdminManager {
     private IAdminDal adminDal;
-    public AdminManager(IAdminDal adminDal){
+
+    public AdminManager(IAdminDal adminDal) {
         this.adminDal = adminDal;
     }
 
-    public ResponseEntitySet<LoginData> login(AdminLoginRequest request){
-        if(!request.isValid()){
+    public ResponseEntitySet<LoginData> login(AdminLoginRequest request) {
+        if (!request.isValid()) {
             return new ResponseEntitySet<>(false, ErrorMessages.inValidData);
         }
-        try{
+        try {
             String role = Managers.adminManager.isExists(request.getUname());
-            if(TextUtils.isEmpty(role)){
+            if (TextUtils.isEmpty(role)) {
                 return new ResponseEntitySet<>(false, ErrorMessages.notAccessUserInformation);
-            }else{
+            } else {
                 String phone = this.adminDal.login(request);
-                if(!TextUtils.isEmpty(phone)){
+                if (!TextUtils.isEmpty(phone)) {
                     String code = Functions.generateCode();
                     ResponseEntity updateResponse = verifyCodeUpdate(request.getUname(), code);
-                    if(updateResponse.isSuccess){
+                    if (updateResponse.isSuccess) {
                         return new ResponseEntitySet<>(new LoginData(phone, code));
-                    }else{
+                    } else {
                         return new ResponseEntitySet<>(false, updateResponse.message);
                     }
-                }else{
+                } else {
                     return new ResponseEntitySet<>(false, ErrorMessages.uNameOrPasswordInCorrect);
                 }
             }
-        }catch (ConnectionException | NullPointerException e){
+        } catch (ConnectionException | NullPointerException e) {
             return new ResponseEntitySet<>(false, e.getLocalizedMessage());
         }
     }
 
-    public Object verifyCode(AdminLoginVerifyRequest request, String ip){
-        if(!request.isValid()){
+    public Object verifyCode(AdminLoginVerifyRequest request, HttpServletRequest hsr) {
+        if (!request.isValid()) {
             return new ResponseEntity(false, ErrorMessages.inValidData);
         }
-        try{
+        try {
             String role = isExists(request.getUname());
-            if(TextUtils.isEmpty(role)){
+            if (TextUtils.isEmpty(role)) {
                 return new ResponseEntity(false, ErrorMessages.notAccessUserInformation);
-            }else{
+            } else {
                 Object response = this.adminDal.verifyCode(request.getUname(), request.getCode());
-                if(response instanceof ResponseEntity){
-                    if(((ResponseEntity)response).isSuccess){
-                        adminLogSend("verifyCode", request.getUname(), ip, LogEventDescription.LOGIN.getMessage());
+                if (response instanceof ResponseEntity) {
+                    if (((ResponseEntity) response).isSuccess) {
+                        adminLogSend("verifyCode", request.getUname(), Functions.getClientIpAddress(hsr),
+                                Functions.getBrowserOrDevice(hsr), LogEventDescription.LOGIN.getMessage());
                     }
                 }
                 return response;
             }
-        }catch (ConnectionException | NullPointerException e){
+        } catch (ConnectionException | NullPointerException e) {
             return new ResponseEntity(false, e.getLocalizedMessage());
         }
     }
 
-    public String isExists(String unameOrUserID) throws ConnectionException, NullPointerException{
-        if(TextUtils.isEmpty(unameOrUserID)){
+    public String isExists(String unameOrUserID) throws ConnectionException, NullPointerException {
+        if (TextUtils.isEmpty(unameOrUserID)) {
             throw new NullPointerException(ErrorMessages.inValidData);
         }
         return this.adminDal.isExists(unameOrUserID);
     }
 
-    public ResponseEntity verifyCodeUpdate(String uname, String code) throws ConnectionException, NullPointerException{
-        if(TextUtils.isEmpty(uname) || TextUtils.isEmpty(code)){
+    public ResponseEntity verifyCodeUpdate(String uname, String code) throws ConnectionException, NullPointerException {
+        if (TextUtils.isEmpty(uname) || TextUtils.isEmpty(code)) {
             throw new NullPointerException(ErrorMessages.inValidData);
         }
         return this.adminDal.verifyCodeUpdate(uname, code);
     }
 
-    private void adminLogSend(String methodName, String phoneOrUserID, String ip, String eventDescription){
-        new Thread(()->{
+    private void adminLogSend(String methodName, String phoneOrUserID, String ip, String browserOrDevice,
+            String eventDescription) {
+        new Thread(() -> {
             try {
                 Managers.logManager.create(
                         new Log(
@@ -97,11 +102,11 @@ public class AdminManager {
                                 Role.ADMIN.value(),
                                 ip,
                                 Functions.getIpAddress(),
-                                eventDescription
-                        )
-                );
-            } catch (
-                    UnknownHostException e) {
+                                eventDescription,
+                                browserOrDevice
+
+                        ));
+            } catch (UnknownHostException e) {
                 System.out.println(e.getLocalizedMessage());
             }
         }).start();
