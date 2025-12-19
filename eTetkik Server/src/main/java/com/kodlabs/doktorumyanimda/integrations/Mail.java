@@ -84,9 +84,10 @@ class Mail implements IIntegrations {
         final String path;
         String contentData;
         String data;
+        // Daha sonra farklı mail içerikleri eklenebilir
         switch (MailTypes.findType(entity.type)) {
             case SUPPORT:
-                path = Common.contentSource.concat("/mail-content/reset-password.html");
+                path = Common.contentSource.concat("/apps/eTetkik/mail-contents/reset-password.html");
                 contentData = Functions.getFileContent(path);
                 // eklenecek-önemli not: mail içeriğinde % işareti varsa hata veriyor. O yüzden
                 // % işaretini %% yapıyoruz.
@@ -94,7 +95,7 @@ class Mail implements IIntegrations {
                 data = String.format(safeTemplate, entity.message);
                 break;
             case VERIFY:
-                path = Common.contentSource.concat("/mail-content/new_account.html");
+                path = Common.contentSource.concat("/apps/eTetkik/mail-contents/new_account.html");
                 contentData = Functions.getFileContent(path);
                 // eklenecek-önemli not: mail içeriğinde % işareti varsa hata veriyor. O yüzden
                 // % işaretini %% yapıyoruz.

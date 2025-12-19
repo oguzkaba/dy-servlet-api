@@ -26,10 +26,12 @@ com\kodlabs\doktorumyanimda\pay\verify\PaymentVerifyFactory.class
 com\kodlabs\doktorumyanimda\model\user\ChangePassword.class
 com\kodlabs\doktorumyanimda\servlet\DoctorGovernmentalServiceContract.class
 com\kodlabs\doktorumyanimda\model\admin\user\AdminLoginVerifyRequest.class
+com\kodlabs\doktorumyanimda\model\reviews\ReviewReplyRequest.class
 com\kodlabs\doktorumyanimda\dal\ICityDal.class
 com\kodlabs\doktorumyanimda\model\user\LoginRequest.class
 com\kodlabs\doktorumyanimda\servlet\AdminLogin.class
 com\kodlabs\doktorumyanimda\integrations\Mail.class
+com\kodlabs\doktorumyanimda\model\reviews\ReviewCreateRequest.class
 com\kodlabs\doktorumyanimda\model\report\warning\WarningContent.class
 com\kodlabs\doktorumyanimda\servlet\AdminLogout.class
 com\kodlabs\doktorumyanimda\utils\ForgotVerification.class
@@ -53,6 +55,7 @@ com\kodlabs\doktorumyanimda\servlet\PrivacyPolicyEN.class
 com\kodlabs\doktorumyanimda\dal\IPatientProfileDal.class
 com\kodlabs\doktorumyanimda\task\BloodPressureWarningTask$1.class
 com\kodlabs\doktorumyanimda\model\user\ResetPassword.class
+com\kodlabs\doktorumyanimda\dal\mysql\MysqlReviewsDal.class
 com\kodlabs\doktorumyanimda\model\ckys\calisma\CalismaSonuc.class
 com\kodlabs\doktorumyanimda\model\message\MessageContent.class
 com\kodlabs\doktorumyanimda\messages\ErrorMessage.class
@@ -85,10 +88,12 @@ com\kodlabs\doktorumyanimda\model\user\AvailableContact.class
 com\kodlabs\doktorumyanimda\servlet\Doctors.class
 com\kodlabs\doktorumyanimda\model\report\ReportType.class
 com\kodlabs\doktorumyanimda\controller\PatientProfileManager.class
+com\kodlabs\doktorumyanimda\controller\ReviewsManager.class
 com\kodlabs\doktorumyanimda\model\videochat\CreateSessionRequest.class
 com\kodlabs\doktorumyanimda\service\NVIService.class
 com\kodlabs\doktorumyanimda\dto\user\ContactDTO.class
 com\kodlabs\doktorumyanimda\utils\Role.class
+com\kodlabs\doktorumyanimda\dal\IReviewsDal.class
 com\kodlabs\doktorumyanimda\model\pay\google\GooglePaymentVerifyResponse.class
 com\kodlabs\doktorumyanimda\servlet\DoctorMainPage.class
 com\kodlabs\doktorumyanimda\api\PatientApi.class
@@ -121,6 +126,7 @@ com\kodlabs\doktorumyanimda\model\peak\CreatePeakRequest.class
 com\kodlabs\doktorumyanimda\controller\DoctorProfileManager.class
 com\kodlabs\doktorumyanimda\model\user\User.class
 com\kodlabs\doktorumyanimda\messages\ErrorMessages.class
+com\kodlabs\doktorumyanimda\api\ReviewsApi.class
 com\kodlabs\doktorumyanimda\model\peak\Peak.class
 com\kodlabs\doktorumyanimda\dal\IAdminDal.class
 com\kodlabs\doktorumyanimda\dto\patient\enabiz\service\EnabizServiceInformationDTO.class
@@ -207,6 +213,7 @@ com\kodlabs\doktorumyanimda\model\report\userdrug\IUserDrugEntity.class
 com\kodlabs\doktorumyanimda\model\setting\AppSetting.class
 com\kodlabs\doktorumyanimda\dal\ILogDal.class
 com\kodlabs\doktorumyanimda\controller\HealthFacilityManager.class
+com\kodlabs\doktorumyanimda\model\reviews\Review.class
 com\kodlabs\doktorumyanimda\model\doctor\user\DoctorRegister.class
 com\kodlabs\doktorumyanimda\model\user\SendVerifyType.class
 com\kodlabs\doktorumyanimda\servlet\DoctorEdit.class
@@ -259,6 +266,7 @@ com\kodlabs\doktorumyanimda\utils\Phones$1.class
 com\kodlabs\doktorumyanimda\dal\mysql\MysqlMessageDal.class
 com\kodlabs\doktorumyanimda\videoChat\ByteBuf.class
 com\kodlabs\doktorumyanimda\videoChat\DynamicKey.class
+com\kodlabs\doktorumyanimda\model\reviews\ReviewReply.class
 com\kodlabs\doktorumyanimda\servlet\DoctorRegister.class
 com\kodlabs\doktorumyanimda\servlet\PatientRegister.class
 com\kodlabs\doktorumyanimda\servlet\PrivacyPolicyTR.class
@@ -274,6 +282,7 @@ com\kodlabs\doktorumyanimda\servlet\filter\AdminLogin.class
 com\kodlabs\doktorumyanimda\model\social\SocialType.class
 com\kodlabs\doktorumyanimda\controller\DoctorManager$1.class
 com\kodlabs\doktorumyanimda\dal\mysql\MysqlPatientProfileDal.class
+com\kodlabs\doktorumyanimda\model\reviews\ReviewsEditRequest.class
 com\kodlabs\doktorumyanimda\model\user\profile\Profile.class
 com\kodlabs\doktorumyanimda\model\social\SocialAccount.class
 com\kodlabs\doktorumyanimda\model\health_facility\HealthFacility.class
@@ -304,6 +313,7 @@ com\kodlabs\doktorumyanimda\integrations\IntegrationsFactory.class
 com\kodlabs\doktorumyanimda\api\DoctorApi.class
 com\kodlabs\doktorumyanimda\model\user\address\District.class
 com\kodlabs\doktorumyanimda\model\doctor\DoctorBaseProfile.class
+com\kodlabs\doktorumyanimda\model\reviews\DoctorSummary.class
 com\kodlabs\doktorumyanimda\dto\patient\notes\PatientNotesContentDTO.class
 com\kodlabs\doktorumyanimda\model\report\warning\WarningType.class
 com\kodlabs\doktorumyanimda\model\doctor\detail\DoctorDetailUpdateRequest.class

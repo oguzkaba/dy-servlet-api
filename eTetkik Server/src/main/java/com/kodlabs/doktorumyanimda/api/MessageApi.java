@@ -1,22 +1,11 @@
 package com.kodlabs.doktorumyanimda.api;
 
-import com.kodlabs.doktorumyanimda.events.EventsFactory;
-import com.kodlabs.doktorumyanimda.events.EventsFunctions;
-import com.kodlabs.doktorumyanimda.events.EventsType;
-import com.kodlabs.doktorumyanimda.events.IEvents;
-import com.kodlabs.doktorumyanimda.events.azure.AzureEventsEntity;
-import com.kodlabs.doktorumyanimda.messages.Messages;
 import com.kodlabs.doktorumyanimda.model.ResponseEntity;
 import com.kodlabs.doktorumyanimda.model.ResponseEntitySet;
 import com.kodlabs.doktorumyanimda.model.message.Message;
 import com.kodlabs.doktorumyanimda.model.message.MessageContent;
 import com.kodlabs.doktorumyanimda.model.message.SendMessageRequest;
-import com.kodlabs.doktorumyanimda.utils.*;
 import com.kodlabs.doktorumyanimda.controller.Managers;
-import com.kodlabs.doktorumyanimda.model.message.*;
-import com.kodlabs.doktorumyanimda.model.notification.NotificationLog;
-import com.kodlabs.doktorumyanimda.notification.NotificationType;
-import com.kodlabs.doktorumyanimda.notification.Notifications;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;

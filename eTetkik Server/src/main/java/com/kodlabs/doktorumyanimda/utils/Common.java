@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 
 public final class Common {
     public static final Gson gson = new Gson();
-    public static final boolean isLocal = true; // Set to false for production
+    public static final boolean isLocal = false; // Set to false for production
     public static final String contentSource = isLocal ? "D:" : "";
     public static final String appName = "Doktorum Yanımda";
     public static final String oneSignalAppID = "cebc0888-b542-4f03-b63e-003c37ea48b1";

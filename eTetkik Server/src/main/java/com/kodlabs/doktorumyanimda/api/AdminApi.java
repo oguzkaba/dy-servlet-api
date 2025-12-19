@@ -11,7 +11,6 @@ import com.kodlabs.doktorumyanimda.model.user.LoginData;
 import com.kodlabs.doktorumyanimda.model.admin.user.AdminLoginRequest;
 import com.kodlabs.doktorumyanimda.model.admin.user.AdminLoginVerifyRequest;
 import com.kodlabs.doktorumyanimda.model.integrations.SmsData;
-import com.kodlabs.doktorumyanimda.utils.Functions;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;

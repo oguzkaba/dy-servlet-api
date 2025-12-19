@@ -34,7 +34,6 @@ import com.kodlabs.doktorumyanimda.utils.AdminRole;
 import com.kodlabs.doktorumyanimda.utils.Common;
 import com.kodlabs.doktorumyanimda.utils.Functions;
 import com.kodlabs.doktorumyanimda.utils.Phones;
-import com.kodlabs.doktorumyanimda.utils.Role;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;

@@ -13,7 +13,6 @@ import com.kodlabs.doktorumyanimda.utils.Role;
 import com.kodlabs.doktorumyanimda.utils.TextUtils;
 import com.kodlabs.doktorumyanimda.model.ResponseEntity;
 import com.kodlabs.doktorumyanimda.model.ResponseEntitySet;
-import com.google.api.Http;
 import com.kodlabs.doktorumyanimda.dal.ConnectionException;
 import com.kodlabs.doktorumyanimda.dal.IMessageDal;
 import com.kodlabs.doktorumyanimda.model.message.*;

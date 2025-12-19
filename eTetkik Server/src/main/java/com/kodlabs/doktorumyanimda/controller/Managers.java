@@ -20,4 +20,5 @@ public class Managers {
     public static CityManager cityManager;
 
     public static LogManager logManager;
+    public static ReviewsManager reviewsManager;
 }

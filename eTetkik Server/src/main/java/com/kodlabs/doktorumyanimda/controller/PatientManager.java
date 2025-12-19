@@ -36,12 +36,10 @@ import com.kodlabs.doktorumyanimda.model.user.UserContactInformation;
 import com.kodlabs.doktorumyanimda.model.user.UserPatient;
 import com.kodlabs.doktorumyanimda.service.NVIService;
 import com.kodlabs.doktorumyanimda.utils.*;
-import com.google.api.Http;
 import com.kodlabs.doktorumyanimda.dal.ConnectionException;
 import com.kodlabs.doktorumyanimda.dal.IPatientDal;
 import com.kodlabs.doktorumyanimda.model.ResponseEntity;
 
-import java.io.IOException;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -172,7 +170,11 @@ public class PatientManager {
             return new ResponseEntitySet<>(false, ErrorMessages.inValidData);
         }
         try {
-            // Verify NVI isLocal
+            // TO-DO: NVI Integration
+            // ! The Republic of Turkey's open API for identity verification has been shut
+            // down.
+            // ! Therefore, the authentication process has been temporarily disabled until
+            // access to the KPS system is granted.
             if (Common.isLocal) {
                 ResponseEntitySet<UserPatient> response = this.patientDal.singUpV2(request);
                 if (response.isSuccess && !Phones.isContains(request.getPhone(), false)) {
@@ -331,7 +333,6 @@ public class PatientManager {
         try {
             if (Managers.userManager.isExistsUser(userID, role)) {
                 if (Managers.userManager.isExistsUser(patientID, Role.PATIENT.value())) {
-                    String patientName = Managers.userManager.getFullName(patientID, Role.PATIENT.value());
                     String tempPatientID = patientID;
                     String fullName = Managers.userManager.getFullName(userID, role);
                     ResponseEntity response = this.patientDal.delete(userID, role, patientID);

@@ -1,6 +1,5 @@
 package com.kodlabs.doktorumyanimda.controller;
 
-import com.google.api.Http;
 import com.kodlabs.doktorumyanimda.dal.ConnectionException;
 import com.kodlabs.doktorumyanimda.dal.IDoctorProfileDal;
 import com.kodlabs.doktorumyanimda.model.ResponseEntity;

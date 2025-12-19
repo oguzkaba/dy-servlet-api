@@ -10,31 +10,35 @@ import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class Sms implements IIntegrations{
+class Sms implements IIntegrations {
     public SmsData data;
-    public Sms(SmsData data){
+
+    public Sms(SmsData data) {
         this.data = data;
     }
+
     private final String subscribe = "03129115435";
     private final String password = "D7@FC79L";
     private final String title = "3129115435";
+
     @Override
     public boolean sendMessage() {
-        if(!TextUtils.isEmpty(data.getPhone())){
+        if (!TextUtils.isEmpty(data.getPhone())) {
             String phone = data.getPhone().trim();
             String dialCode = phone.substring(0, phone.length() - 10);
-            if(dialCode.equals("+90")){
+            if (dialCode.equals("+90")) {
                 return OTPSms();
-            }else{
+            } else {
                 return sms();
             }
         }
         return false;
     }
-    private boolean OTPSms(){
+
+    private boolean OTPSms() {
         try {
             URL url = new URL("https://api.netgsm.com.tr/sms/send/otp");
-            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
             connection.setDoInput(true);
@@ -52,25 +56,27 @@ class Sms implements IIntegrations{
                             .concat("</msg>")
                             .concat("<no>%s</no>")
                             .concat("</body>")
-                            .concat("</mainbody>"), subscribe, password, title, data.getMsg(), data.getPhone().substring(data.getPhone().length() - 10)
-            );
+                            .concat("</mainbody>"),
+                    subscribe, password, title, data.getMsg(),
+                    data.getPhone().substring(data.getPhone().length() - 10));
             return sendSmsResult(connection, body);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return false;
     }
-    private boolean sms(){
+
+    private boolean sms() {
         try {
-            String phone = data.getPhone().replace("+","00");
+            String phone = data.getPhone().replace("+", "00");
             System.out.println(phone);
             URL url = new URL("https://api.netgsm.com.tr/sms/send/xml");
-            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
             connection.setDoInput(true);
             connection.setUseCaches(false);
-            connection.setRequestProperty("Content-Type","text/xml");
+            connection.setRequestProperty("Content-Type", "text/xml");
             String body = String.format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                     " <mainbody>\n" +
                     " <header>\n" +
@@ -86,14 +92,15 @@ class Sms implements IIntegrations{
                     " </msg>\n" +
                     "    <no>%s</no>\n" +
                     " </body>\n" +
-                    " </mainbody>", subscribe, password,  title, data.getMsg(), phone);
+                    " </mainbody>", subscribe, password, title, data.getMsg(), phone);
             return sendSmsResult(connection, body);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return false;
     }
-    private boolean sendSmsResult(HttpURLConnection connection, String body) throws IOException{
+
+    private boolean sendSmsResult(HttpURLConnection connection, String body) throws IOException {
         final OutputStream os = connection.getOutputStream();
         final OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.UTF_8);
         osw.write(body);
@@ -103,39 +110,40 @@ class Sms implements IIntegrations{
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         StringBuilder responseBuilder = new StringBuilder();
         String line;
-        while((line = br.readLine()) != null){
+        while ((line = br.readLine()) != null) {
             responseBuilder.append(line);
         }
         is.close();
         os.close();
         final String response = responseBuilder.toString();
-        if(connection.getResponseCode() == HttpURLConnection.HTTP_OK){
-            if(!TextUtils.isEmpty(response)){
+        if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            if (!TextUtils.isEmpty(response)) {
                 System.out.println(response);
                 String code = getResponseField(response, "code");
-                if(!TextUtils.isEmpty(code)){
-                    if(code.equals("0")){
+                if (!TextUtils.isEmpty(code)) {
+                    if (code.equals("0")) {
                         String jobID = getResponseField(response, "jobID");
                         System.out.println(jobID);
                         return true;
-                    }else{
+                    } else {
                         String error = getResponseField(response, "error");
                         System.out.println(error);
                         return false;
                     }
-                }else{
+                } else {
                     return true;
                 }
             }
-        }else{
+        } else {
             return false;
         }
         return false;
     }
-    private String getResponseField(String response, String param){
+
+    private String getResponseField(String response, String param) {
         Pattern pattern = Pattern.compile(String.format("(?<=<%s>)(.*)(?=</%s>)", param, param));
         Matcher matcher = pattern.matcher(response);
-        if(matcher.find()){
+        if (matcher.find()) {
             return matcher.group(0);
         }
         return "";

@@ -2,15 +2,13 @@ package com.kodlabs.doktorumyanimda.api;
 
 import com.kodlabs.doktorumyanimda.controller.*;
 import com.kodlabs.doktorumyanimda.dal.mysql.*;
-import com.kodlabs.doktorumyanimda.controller.*;
-import com.kodlabs.doktorumyanimda.dal.mysql.*;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 @ApplicationPath("api")
 public class Api extends Application {
-    public Api(){
+    public Api() {
         Managers.userManager = new UserManager(new MysqlUserDal());
         Managers.notificationManager = new NotificationManager(new MysqlNotificationDal());
         Managers.reportManager = new ReportManager(new MysqlReportDal());
@@ -26,6 +24,7 @@ public class Api extends Application {
         Managers.videoChatManager = new VideoChatManager();
         Managers.healthFacilityManager = new HealthFacilityManager(new MysqlHealthFacilityDal());
         Managers.cityManager = new CityManager(new MysqlCityDal());
+        Managers.reviewsManager = new ReviewsManager(new MysqlReviewsDal());
 
         Managers.logManager = new LogManager(new MysqlLogDal());
     }
