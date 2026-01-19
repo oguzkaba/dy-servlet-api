@@ -211,13 +211,12 @@ public class MysqlUserDal implements IUserDal {
             }
             query.append(" from ")
                     .append(role == Role.PATIENT.value()
-                            ? "patient LEFT patient_profile ON patient.userID = patient_profile.userID"
+                            ? "patient LEFT JOIN patient_profile ON patient.userID = patient_profile.userID"
                             : "doctor LEFT JOIN doctor_profile ON doctor.userID = doctor_profile.doctorID")
-                    .append(role == Role.PATIENT.value() ? " WHERE patient.uname = ? or patient.userID = ?"
-                            : " WHERE doctor.uname = ? or doctor.userID = ?");
+                    .append(role == Role.PATIENT.value() ? " WHERE patient.userID = ?"
+                            : " WHERE doctor.userID = ?");
             statement = MysqlConnection.getInstance().prepareStatement(query.toString());
             statement.setString(1, userNo);
-            statement.setString(2, userNo);
             resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 result = new HashMap<>();

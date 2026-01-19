@@ -25,6 +25,7 @@ public class Api extends Application {
         Managers.healthFacilityManager = new HealthFacilityManager(new MysqlHealthFacilityDal());
         Managers.cityManager = new CityManager(new MysqlCityDal());
         Managers.reviewsManager = new ReviewsManager(new MysqlReviewsDal());
+        Managers.paymentManager = new PaymentManager(new MysqlPaymentDal());
 
         Managers.logManager = new LogManager(new MysqlLogDal());
     }

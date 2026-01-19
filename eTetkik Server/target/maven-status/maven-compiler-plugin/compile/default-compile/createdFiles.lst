@@ -1,5 +1,6 @@
 com\kodlabs\doktorumyanimda\api\NotificationApi.class
 com\kodlabs\doktorumyanimda\events\azure\AzureEventsEntity.class
+com\kodlabs\doktorumyanimda\model\payment\PaymentInitializeRequest.class
 com\kodlabs\doktorumyanimda\model\ResponseEntitySet.class
 com\kodlabs\doktorumyanimda\controller\VideoChatManager.class
 com\kodlabs\doktorumyanimda\model\user\profile\DoctorProfile.class
@@ -46,6 +47,7 @@ com\kodlabs\doktorumyanimda\model\patient\inspection\TimeSlot.class
 com\kodlabs\doktorumyanimda\model\report\Report.class
 com\kodlabs\doktorumyanimda\model\patient\notes\PatientNotesContent.class
 com\kodlabs\doktorumyanimda\servlet\PatientExaminationAdd.class
+com\kodlabs\doktorumyanimda\config\IyzicoConfig.class
 com\kodlabs\doktorumyanimda\videoChat\DynamicKey5$DynamicKey5Content.class
 com\kodlabs\doktorumyanimda\model\report\bloodpressure\BloodPressure.class
 com\kodlabs\doktorumyanimda\model\health_facility\HealthFacilityUpdateRequest.class
@@ -62,6 +64,7 @@ com\kodlabs\doktorumyanimda\messages\ErrorMessage.class
 com\kodlabs\doktorumyanimda\events\IEventsEntity.class
 com\kodlabs\doktorumyanimda\model\message\Message.class
 com\kodlabs\doktorumyanimda\model\patient\systakipno\PatientSysTakipNoCreateRequest.class
+com\kodlabs\doktorumyanimda\controller\PaymentManager.class
 com\kodlabs\doktorumyanimda\notification\Notifications.class
 com\kodlabs\doktorumyanimda\model\user\PhoneVerifyRequest.class
 com\kodlabs\doktorumyanimda\model\admin\user\AdminLoginRequest.class
@@ -91,12 +94,14 @@ com\kodlabs\doktorumyanimda\controller\PatientProfileManager.class
 com\kodlabs\doktorumyanimda\controller\ReviewsManager.class
 com\kodlabs\doktorumyanimda\model\videochat\CreateSessionRequest.class
 com\kodlabs\doktorumyanimda\service\NVIService.class
+com\kodlabs\doktorumyanimda\dal\IPaymentDal.class
 com\kodlabs\doktorumyanimda\dto\user\ContactDTO.class
 com\kodlabs\doktorumyanimda\utils\Role.class
 com\kodlabs\doktorumyanimda\dal\IReviewsDal.class
 com\kodlabs\doktorumyanimda\model\pay\google\GooglePaymentVerifyResponse.class
 com\kodlabs\doktorumyanimda\servlet\DoctorMainPage.class
 com\kodlabs\doktorumyanimda\api\PatientApi.class
+com\kodlabs\doktorumyanimda\api\PaymentApi.class
 com\kodlabs\doktorumyanimda\model\patient\PatientStatusUpdateRequest.class
 com\kodlabs\doktorumyanimda\model\peak\GoogleProduct.class
 com\kodlabs\doktorumyanimda\servlet\useOfBloodPressureAndPulse.class
@@ -116,6 +121,7 @@ com\kodlabs\doktorumyanimda\model\log\LogEventDescription.class
 com\kodlabs\doktorumyanimda\model\patient\notes\PatientNotes.class
 com\kodlabs\doktorumyanimda\model\user\UserDoctor.class
 com\kodlabs\doktorumyanimda\model\report\userdrug\UserDrugRequest.class
+com\kodlabs\doktorumyanimda\servlet\IyzicoCallbackServlet.class
 com\kodlabs\doktorumyanimda\videoChat\Packable.class
 com\kodlabs\doktorumyanimda\model\doctor\DoctorPayInformation.class
 com\kodlabs\doktorumyanimda\servlet\PatientComplaintList.class
@@ -148,6 +154,7 @@ com\kodlabs\doktorumyanimda\model\patient\notes\PatientNotesContentUpdateRequest
 com\kodlabs\doktorumyanimda\model\report\userdrug\UserDrug.class
 com\kodlabs\doktorumyanimda\model\user\address\Address.class
 com\kodlabs\doktorumyanimda\servlet\PhoneLoginRecaptcha.class
+com\kodlabs\doktorumyanimda\dal\mysql\MysqlPaymentDal.class
 com\kodlabs\doktorumyanimda\model\user\UserInformation.class
 com\kodlabs\doktorumyanimda\model\health_facility\HealthFacilityDetail.class
 com\kodlabs\doktorumyanimda\videoChat\AccessToken$Privileges.class
@@ -257,6 +264,7 @@ com\kodlabs\doktorumyanimda\model\doctor\user\DoctorLoginRequest.class
 com\kodlabs\doktorumyanimda\integrations\Mail$1.class
 com\kodlabs\doktorumyanimda\utils\Phones.class
 com\kodlabs\doktorumyanimda\model\user\UserAdmin.class
+com\kodlabs\doktorumyanimda\service\IyzicoPaymentService.class
 com\kodlabs\doktorumyanimda\model\ckys\calisma\CalismaBilgisiResult.class
 com\kodlabs\doktorumyanimda\model\report\examination\ExaminationUpdateRequest.class
 com\kodlabs\doktorumyanimda\dal\mysql\MysqlConnection$Connect.class

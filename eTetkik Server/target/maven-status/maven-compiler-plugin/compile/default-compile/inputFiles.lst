@@ -7,6 +7,7 @@ D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\ma
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\dal\mysql\MysqlConnection.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\patient\PatientStatusUpdateRequest.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\utils\Phones.java
+D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\service\IyzicoPaymentService.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\servlet\DistanceServiceSalesAgreement.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\health_facility\admin\HFAdminCreate.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\patient\user\PatientNewVerifyCodeRequest.java
@@ -34,6 +35,7 @@ D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\ma
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\doctor\DoctorPeakDetail.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\log\Log.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\peak\CreatePeakRequest.java
+D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\servlet\IyzicoCallbackServlet.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\health_facility\HealthFacilityUpdateRequest.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\user\ResetPassword.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\servlet\DoctorGovernmentalServiceContract.java
@@ -43,6 +45,7 @@ D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\ma
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\user\SendVerifyCodeRequest.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\message\MessageType.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\report\userdrug\UserDrugReport.java
+D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\payment\PaymentInitializeRequest.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\peak\PeakPayRequest.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\report\warning\TriggerWarningType.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\utils\Patterns.java
@@ -74,6 +77,7 @@ D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\ma
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\controller\MessageManager.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\report\bloodpressure\BloodPressureUpdateReport.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\doctor\registration\RegistrationInformation.java
+D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\dal\IPaymentDal.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\controller\NotificationManager.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\dal\INotificationDal.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\dal\mysql\MysqlPatientProfileDal.java
@@ -101,6 +105,7 @@ D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\ma
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\reviews\ReviewReply.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\user\LoginData.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\user\UserInformation.java
+D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\controller\PaymentManager.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\servlet\PatientComplaintCreate.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\report\bloodpressure\BloodPressurePatientInformation.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\api\UserApi.java
@@ -119,6 +124,7 @@ D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\ma
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\dto\doctor\ConsultationDoctorDTO.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\servlet\PatientComplaintList.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\dal\IPeakDal.java
+D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\dal\mysql\MysqlPaymentDal.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\servlet\filter\PatientControl.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\doctor\DoctorBaseInformation.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\user\LoginRequest.java
@@ -264,6 +270,7 @@ D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\ma
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\report\examination\ExaminationUpdateContentRequest.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\api\HealthFacilityApi.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\doctor\peak\PeakFeeDetail.java
+D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\api\PaymentApi.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\social\SocialType.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\reviews\ReviewReplyRequest.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\api\PeakApi.java
@@ -282,6 +289,7 @@ D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\ma
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\report\examination\ExaminationUpdateRequest.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\dal\mysql\MysqlNotificationDal.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\doctor\user\DoctorLoginVerifyRequest.java
+D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\config\IyzicoConfig.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\integrations\IIntegrations.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\patient\inspection\Inspection.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\servlet\DoctorPrivateServiceContract.java
