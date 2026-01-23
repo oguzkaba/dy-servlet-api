@@ -1,17 +1,13 @@
 package com.kodlabs.doktorumyanimda.controller;
 
 import com.iyzipay.model.CheckoutFormInitialize;
-import com.iyzipay.model.Locale;
-import com.iyzipay.model.PaymentGroup;
-import com.iyzipay.model.BasketItem;
-import com.iyzipay.model.BasketItemType;
-import com.iyzipay.request.CreateCheckoutFormInitializeRequest;
 import com.kodlabs.doktorumyanimda.config.IyzicoConfig;
 import com.kodlabs.doktorumyanimda.dal.ConnectionException;
 import com.kodlabs.doktorumyanimda.dal.IPaymentDal;
 import com.kodlabs.doktorumyanimda.messages.ErrorMessages;
 import com.kodlabs.doktorumyanimda.model.ResponseEntity;
 import com.kodlabs.doktorumyanimda.model.payment.PaymentInitializeRequest;
+import com.kodlabs.doktorumyanimda.service.IyzicoPaymentService;
 import com.kodlabs.doktorumyanimda.utils.Role;
 
 import java.util.Arrays;
@@ -27,9 +23,11 @@ import java.nio.charset.StandardCharsets;
 public class PaymentManager {
 
     private final IPaymentDal paymentDal;
+    private final IyzicoPaymentService iyzicoPaymentService;
 
     public PaymentManager(IPaymentDal paymentDal) {
         this.paymentDal = paymentDal;
+        this.iyzicoPaymentService = new IyzicoPaymentService();
     }
 
     public ResponseEntity initializeCheckoutForm(PaymentInitializeRequest request) {
@@ -40,6 +38,8 @@ public class PaymentManager {
         // 1. & 2. Validation and Data Retrieval
         ResponseEntity appointmentCheck;
         Map<String, Object> patientInfo = null;
+        BigDecimal finalPrice = BigDecimal.ZERO;
+
         try {
             // Patient Existence Check
             if (!Managers.userManager.isExistsUser(request.getPatientID(), Role.PATIENT.value())) {
@@ -53,7 +53,17 @@ public class PaymentManager {
                 return appointmentCheck;
             }
 
-            // 3. Fetch Patient Attributes for Iyzico form enrichment
+            // Security Check: Verify that the doctorID from request matches the one in DB
+            // for this appointment
+            String dbDoctorId = (String) appointmentCheck.data;
+            if (dbDoctorId == null || !dbDoctorId.equals(request.getDoctorID())) {
+                return new ResponseEntity(false, "Hata: Belirtilen doktor randevu ile eslesmiyor.");
+            }
+
+            // 3. Dynamic Price Calculation
+            finalPrice = paymentDal.calculateFinalPrice(request.getDoctorID(), request.getPatientID());
+
+            // 4. Fetch Patient Attributes for Iyzico form enrichment
             patientInfo = Managers.userManager.getAttributes(request.getPatientID(),
                     Role.PATIENT.value(),
                     Arrays.asList("name", "surname", "email", "phone", "tc_number"));
@@ -61,77 +71,29 @@ public class PaymentManager {
             return new ResponseEntity(false, e.getLocalizedMessage());
         }
 
-        String name = "Patient";
-        String surname = "Name";
-        String email = "email@example.com";
-        String tcNo = "11111111111"; // Default
-        String phone = "+905555555555";
-        String addressLine = "Address Not Provided";
-        String city = "Not Provided";
-        String district = "Not Provided";
+        // --- FREE APPOINTMENT FLOW ---
+        // If price is 0.0, bypass Iyzico and activate directly
+        if (finalPrice.compareTo(BigDecimal.ZERO) == 0) {
+            ResponseEntity freeResponse = processPaymentResult(
+                    request.getAppointmentID(),
+                    request.getPatientID(),
+                    "FREE_PROMOTION_" + request.getAppointmentID(),
+                    "FREE_PROMOTION_" + request.getAppointmentID(),
+                    BigDecimal.ZERO,
+                    "SUCCESS",
+                    "Free promotion bypass - dynamic price was 0.0");
 
-        if (patientInfo != null && !patientInfo.containsKey("isSuccess")) {
-            name = (String) patientInfo.getOrDefault("name", name);
-            surname = (String) patientInfo.getOrDefault("surname", surname);
-            email = (String) patientInfo.getOrDefault("email", email);
-            tcNo = (String) patientInfo.getOrDefault("tc_number", tcNo);
-            phone = (String) patientInfo.getOrDefault("phone", phone);
-            addressLine = (String) patientInfo.getOrDefault("address", addressLine);
-            city = (String) patientInfo.getOrDefault("city", city);
-            district = (String) patientInfo.getOrDefault("district", district);
+            if (freeResponse.isSuccess) {
+                // Return a special message suggesting the payment is already done
+                return new ResponseEntity(true, "FREE_SUCCESS");
+            } else {
+                return freeResponse;
+            }
         }
 
-        CreateCheckoutFormInitializeRequest iyzicoRequest = new CreateCheckoutFormInitializeRequest();
-        iyzicoRequest.setLocale(Locale.TR.getValue());
-        iyzicoRequest.setPrice(new BigDecimal(request.getPrice()));
-        iyzicoRequest.setPaidPrice(new BigDecimal(request.getPrice()));
-        iyzicoRequest.setCurrency(com.iyzipay.model.Currency.TRY.name());
-        iyzicoRequest.setBasketId(request.getAppointmentID() + ":" + request.getPatientID());
-        iyzicoRequest.setPaymentGroup(PaymentGroup.LISTING.name());
-        iyzicoRequest.setCallbackUrl(request.getCallbackUrl());
-
-        // Alıcı Bilgileri
-        com.iyzipay.model.Buyer buyer = new com.iyzipay.model.Buyer();
-        buyer.setId(request.getPatientID());
-        buyer.setName(name);
-        buyer.setSurname(surname);
-        buyer.setEmail(email);
-        buyer.setIdentityNumber(tcNo);
-        buyer.setRegistrationAddress(addressLine);
-        buyer.setCity(city);
-        buyer.setGsmNumber(phone);
-        buyer.setCountry("Turkey");
-        iyzicoRequest.setBuyer(buyer);
-
-        // Fatura Adresi (Zorunlu)
-        com.iyzipay.model.Address billingAddress = new com.iyzipay.model.Address();
-        billingAddress.setContactName(name + " " + surname);
-        billingAddress.setCity(city);
-        billingAddress.setCountry("Turkey");
-        billingAddress.setAddress(addressLine);
-        iyzicoRequest.setBillingAddress(billingAddress);
-
-        // Teslimat Adresi
-        com.iyzipay.model.Address shippingAddress = new com.iyzipay.model.Address();
-        shippingAddress.setContactName(name + " " + surname);
-        shippingAddress.setCity(city);
-        shippingAddress.setCountry("Turkey");
-        shippingAddress.setAddress(addressLine);
-        iyzicoRequest.setShippingAddress(shippingAddress);
-
-        // Sepet İçeriği (Zorunlu)
-        java.util.List<BasketItem> basketItems = new java.util.ArrayList<>();
-        BasketItem firstBasketItem = new BasketItem();
-        firstBasketItem.setId(request.getAppointmentID().toString());
-        firstBasketItem.setName("Randevu Hizmeti");
-        firstBasketItem.setCategory1("Sağlık Konsültasyonu");
-        firstBasketItem.setItemType(BasketItemType.VIRTUAL.name());
-        firstBasketItem.setPrice(new BigDecimal(request.getPrice()));
-        basketItems.add(firstBasketItem);
-        iyzicoRequest.setBasketItems(basketItems);
-
-        CheckoutFormInitialize checkoutFormInitialize = CheckoutFormInitialize.create(iyzicoRequest,
-                IyzicoConfig.getOptions());
+        // Delegate Iyzico Form initialization to service
+        CheckoutFormInitialize checkoutFormInitialize = iyzicoPaymentService.initializeForm(request, patientInfo,
+                finalPrice);
 
         if (checkoutFormInitialize.getStatus().equals("success")) {
             return new ResponseEntity(true, checkoutFormInitialize.getCheckoutFormContent());

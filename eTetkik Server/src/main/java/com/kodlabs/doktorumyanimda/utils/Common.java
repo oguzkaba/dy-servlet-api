@@ -8,7 +8,7 @@ public final class Common {
     public static final String contentSource = isLocal ? "D:" : "";
     public static final String appName = "Doktorum Yanımda";
     public static final String oneSignalAppID = "cebc0888-b542-4f03-b63e-003c37ea48b1";
-    public static final String oneSignalApiKey = "os_v2_app_z26arcfvijhqhnr6aa6dp2siwhewxrrolj5eu3m6cnkya5p6rz7ecflf62k2fn2rxok2vihsbeu4x7m74lfqbjqo5w6qxib7tpdqevq";
+    public static final String oneSignalApiKey = "os_v2_app_z26arcfvijhqhnr6aa6dp2siwgvifige7wted2v54jsiu35shkwtcd72wd747nyh3na47ff32hjg4jlyhmbzy7h7uczldzd4pghxcia";
 
     public static final String cryptKey = "2a46e69e-d511-4fbb-9b9f-5fc20fffc735";
 

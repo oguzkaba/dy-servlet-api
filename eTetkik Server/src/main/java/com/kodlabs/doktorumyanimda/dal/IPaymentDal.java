@@ -10,4 +10,6 @@ public interface IPaymentDal {
     ResponseEntity finalizeAppointmentPayment(Long appointmentId, String paymentId) throws ConnectionException;
 
     ResponseEntity checkAppointmentStatus(Long appointmentId, String patientId) throws ConnectionException;
+
+    BigDecimal calculateFinalPrice(String doctorId, String patientId) throws ConnectionException;
 }

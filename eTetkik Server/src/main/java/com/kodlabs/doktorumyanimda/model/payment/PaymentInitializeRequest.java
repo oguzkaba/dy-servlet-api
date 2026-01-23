@@ -10,14 +10,14 @@ import lombok.Setter;
 @Setter
 public class PaymentInitializeRequest {
     private String patientID; // Alıcı ID
+    private String doctorID; // Fiyat hesaplamasında kullanılacak
     private Long appointmentID; // BasketId olarak kullanılacak
-    private String price; // Randevu tutarı (Örn: "150.00")
     private String callbackUrl; // Ödeme bitince Iyzico'nun yöneleceği adres
 
     public boolean isValid() {
         return !TextUtils.isEmpty(patientID)
+                && !TextUtils.isEmpty(doctorID)
                 && appointmentID != null
-                && !TextUtils.isEmpty(price)
                 && !TextUtils.isEmpty(callbackUrl);
     }
 }

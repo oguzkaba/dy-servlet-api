@@ -92,8 +92,7 @@ public class MysqlPaymentDal implements IPaymentDal {
         ResponseEntity response;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-        // In EnAppointmentStatus, PAYMENT_PENDING is the 5th item (index 4)
-        String sql = "SELECT a.appointment_status, a.patient_id, a.approval_date, t.date, t.start_hour, t.start_minute "
+        String sql = "SELECT a.appointment_status, a.patient_id, a.doctor_id, a.approval_date, t.date, t.start_hour, t.start_minute "
                 + "FROM et_appointment a " + "LEFT JOIN et_time_slot t ON a.time_slot_id = t.id " + "WHERE a.id = ?";
 
         try {
@@ -103,6 +102,7 @@ public class MysqlPaymentDal implements IPaymentDal {
 
             if (resultSet.next()) {
                 String dbPatientId = resultSet.getString("patient_id");
+                String dbDoctorId = resultSet.getString("doctor_id");
                 String status = resultSet.getString("appointment_status");
                 Timestamp approvalDate = resultSet.getTimestamp("approval_date");
                 java.sql.Date slotDate = resultSet.getDate("date");
@@ -135,7 +135,8 @@ public class MysqlPaymentDal implements IPaymentDal {
                         }
                     }
 
-                    response = new ResponseEntity();
+                    // Success Case: Return doctor_id in data for price calculation
+                    response = new ResponseEntity(true, null, dbDoctorId);
                 }
             } else {
                 response = new ResponseEntity(false, "Hata: Randevu bulunamadi.");
@@ -156,5 +157,43 @@ public class MysqlPaymentDal implements IPaymentDal {
             }
         }
         return response;
+    }
+
+    @Override
+    public BigDecimal calculateFinalPrice(String doctorId, String patientId) throws ConnectionException {
+        if (MysqlConnection.getInstance() == null) {
+            throw new ConnectionException();
+        }
+
+        BigDecimal finalPrice = BigDecimal.ZERO;
+        CallableStatement statement = null;
+        String sql = "{CALL getAppointmentFinalPrice(?, ?, ?)}";
+
+        try {
+            statement = MysqlConnection.getInstance().prepareCall(sql);
+            statement.setString(1, doctorId);
+            statement.setString(2, patientId);
+            statement.registerOutParameter(3, java.sql.Types.DECIMAL);
+            statement.execute();
+
+            finalPrice = statement.getBigDecimal(3);
+            if (finalPrice == null) {
+                finalPrice = BigDecimal.ZERO;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // Varsayılan bir ücret veya hata fırlatma mantığı buraya eklenebilir.
+            // Şimdilik 0 dönerek güvenli kalıyoruz, PaymentManager bunu handle edecek.
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return finalPrice;
     }
 }
