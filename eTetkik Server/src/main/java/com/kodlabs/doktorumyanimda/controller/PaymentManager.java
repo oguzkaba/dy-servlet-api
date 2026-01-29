@@ -74,11 +74,12 @@ public class PaymentManager {
         // --- FREE APPOINTMENT FLOW ---
         // If price is 0.0, bypass Iyzico and activate directly
         if (finalPrice.compareTo(BigDecimal.ZERO) == 0) {
+            String uniqueFreeId = "FREE_PROMOTION_" + request.getAppointmentID();
             ResponseEntity freeResponse = processPaymentResult(
                     request.getAppointmentID(),
                     request.getPatientID(),
-                    "FREE_PROMOTION_" + request.getAppointmentID(),
-                    "FREE_PROMOTION_" + request.getAppointmentID(),
+                    uniqueFreeId,
+                    uniqueFreeId,
                     BigDecimal.ZERO,
                     "SUCCESS",
                     "Free promotion bypass - dynamic price was 0.0");
