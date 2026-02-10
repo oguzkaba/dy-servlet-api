@@ -11,5 +11,7 @@ public interface IPaymentDal {
 
     ResponseEntity checkAppointmentStatus(Long appointmentId, String patientId) throws ConnectionException;
 
+    ResponseEntity getAppointmentDetails(Long appointmentId) throws ConnectionException;
+
     BigDecimal calculateFinalPrice(String doctorId, String patientId) throws ConnectionException;
 }

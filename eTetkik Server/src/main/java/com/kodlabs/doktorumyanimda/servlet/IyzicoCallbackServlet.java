@@ -38,7 +38,21 @@ public class IyzicoCallbackServlet extends HttpServlet {
         CheckoutForm checkoutForm = CheckoutForm.retrieve(request, IyzicoConfig.getOptions());
 
         if (checkoutForm != null) {
-            String status = "success".equals(checkoutForm.getStatus()) ? "SUCCESS" : "FAILURE";
+            // 1. Temel Başarı Kontrolü (Teknik başarı + Para çekildi mi?)
+            boolean isSuccessful = "success".equalsIgnoreCase(checkoutForm.getStatus())
+                    && "SUCCESS".equalsIgnoreCase(checkoutForm.getPaymentStatus());
+
+            // 2. Eğer temel ödeme başarılıysa ve bir 3D durumu (mdStatus) varsa, onu da
+            // teyit et.
+            // Eğer mdStatus null ise, bu zaten 3D'siz başarılı bir işlemdir.
+            if (isSuccessful && checkoutForm.getMdStatus() != null) {
+                if (checkoutForm.getMdStatus() != 1) {
+                    // 3D akışı var ama doğrulama başarısız (mdStatus 1 değilse)
+                    isSuccessful = false;
+                }
+            }
+
+            String status = isSuccessful ? "SUCCESS" : "FAILURE";
 
             String basketId = checkoutForm.getBasketId();
             Long appointmentId = 0L;
@@ -50,9 +64,13 @@ public class IyzicoCallbackServlet extends HttpServlet {
             }
 
             String paymentId = checkoutForm.getPaymentId();
-            String transactionId = (checkoutForm.getPaymentItems() != null && !checkoutForm.getPaymentItems().isEmpty())
-                    ? checkoutForm.getPaymentItems().get(0).getPaymentTransactionId()
-                    : "";
+
+            // Handle empty paymentItems gracefully (happens on failures)
+            String transactionId = "";
+            if (checkoutForm.getPaymentItems() != null && !checkoutForm.getPaymentItems().isEmpty()) {
+                transactionId = checkoutForm.getPaymentItems().get(0).getPaymentTransactionId();
+            }
+
             BigDecimal price = checkoutForm.getPrice();
             String rawResult = new Gson().toJson(checkoutForm);
 

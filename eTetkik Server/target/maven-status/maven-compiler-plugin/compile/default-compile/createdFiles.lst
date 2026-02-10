@@ -211,6 +211,7 @@ com\kodlabs\doktorumyanimda\pay\verify\IPaymentVerify.class
 com\kodlabs\doktorumyanimda\dal\mysql\MysqlCityDal.class
 com\kodlabs\doktorumyanimda\model\pay\Payment.class
 com\kodlabs\doktorumyanimda\controller\ReportManager.class
+com\kodlabs\doktorumyanimda\model\payment\AppointmentPriceResponse.class
 com\kodlabs\doktorumyanimda\api\LogApi.class
 com\kodlabs\doktorumyanimda\servlet\filter\PatientControl.class
 com\kodlabs\doktorumyanimda\servlet\PatientExaminationList.class

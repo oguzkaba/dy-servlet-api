@@ -158,6 +158,7 @@ D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\ma
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\health_facility\HealthFacilityCreateRequest.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\dal\IDoctorProfileDal.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\servlet\PatientUserDrugHistory.java
+D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\payment\AppointmentPriceResponse.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\controller\LogManager.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\dal\ICityDal.java
 D:\dev\gitlab\java\old_version\eTetkikServer_pre_may_mater\eTetkik Server\src\main\java\com\kodlabs\doktorumyanimda\model\patient\systakipno\PatientSysTakipNo.java

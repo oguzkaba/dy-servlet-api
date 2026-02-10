@@ -6,6 +6,7 @@ import com.kodlabs.doktorumyanimda.dal.ConnectionException;
 import com.kodlabs.doktorumyanimda.dal.IPaymentDal;
 import com.kodlabs.doktorumyanimda.messages.ErrorMessages;
 import com.kodlabs.doktorumyanimda.model.ResponseEntity;
+import com.kodlabs.doktorumyanimda.model.payment.AppointmentPriceResponse;
 import com.kodlabs.doktorumyanimda.model.payment.PaymentInitializeRequest;
 import com.kodlabs.doktorumyanimda.service.IyzicoPaymentService;
 import com.kodlabs.doktorumyanimda.utils.Role;
@@ -100,6 +101,34 @@ public class PaymentManager {
             return new ResponseEntity(true, checkoutFormInitialize.getCheckoutFormContent());
         } else {
             return new ResponseEntity(false, checkoutFormInitialize.getErrorMessage());
+        }
+    }
+
+    public ResponseEntity getAppointmentPrice(Long appointmentId) {
+        try {
+            ResponseEntity details = paymentDal.getAppointmentDetails(appointmentId);
+            if (!details.isSuccess) {
+                return details;
+            }
+
+            @SuppressWarnings("unchecked")
+            Map<String, String> ids = (Map<String, String>) details.data;
+            String doctorId = ids.get("doctor_id");
+            String patientId = ids.get("patient_id");
+
+            BigDecimal finalPrice = paymentDal.calculateFinalPrice(doctorId, patientId);
+            boolean isFree = finalPrice.compareTo(BigDecimal.ZERO) == 0;
+
+            AppointmentPriceResponse responseData = new AppointmentPriceResponse(
+                    finalPrice,
+                    isFree,
+                    doctorId,
+                    patientId);
+
+            return new ResponseEntity(true, "SUCCESS", responseData);
+
+        } catch (ConnectionException e) {
+            return new ResponseEntity(false, e.getLocalizedMessage());
         }
     }
 

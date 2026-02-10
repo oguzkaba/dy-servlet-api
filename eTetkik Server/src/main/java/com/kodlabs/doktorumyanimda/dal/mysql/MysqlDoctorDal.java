@@ -114,7 +114,8 @@ public class MysqlDoctorDal implements IDoctorDal {
                                 resultSet.getString("address"),
                                 resultSet.getInt("dayHourStart"),
                                 resultSet.getInt("dayHourEnd"),
-                                resultSet.getInt("dayMinutePeriod")));
+                                resultSet.getInt("dayMinutePeriod"),
+                                resultSet.getBigDecimal("appointmentPrice")));
             }
             response = new ResponseEntitySet<>(list);
         } catch (SQLException e) {
@@ -160,7 +161,8 @@ public class MysqlDoctorDal implements IDoctorDal {
                                 resultSet.getString("address"),
                                 resultSet.getInt("dayHourStart"),
                                 resultSet.getInt("dayHourEnd"),
-                                resultSet.getInt("dayMinutePeriod")));
+                                resultSet.getInt("dayMinutePeriod"),
+                                resultSet.getBigDecimal("appointmentPrice")));
             } else {
                 response = new ResponseEntitySet<>(false, ErrorMessages.notAccessUserData);
             }
@@ -228,7 +230,8 @@ public class MysqlDoctorDal implements IDoctorDal {
                                 resultSet.getString("webAddress"),
                                 resultSet.getInt("dayHourStart"),
                                 resultSet.getInt("dayHourEnd"),
-                                resultSet.getInt("dayMinutePeriod")));
+                                resultSet.getInt("dayMinutePeriod"),
+                                resultSet.getBigDecimal("appointmentPrice")));
             } else {
                 response = new ResponseEntitySet<>(false, ErrorMessages.notAccessUserData);
             }

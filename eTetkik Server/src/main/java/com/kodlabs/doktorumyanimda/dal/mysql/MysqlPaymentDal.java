@@ -12,6 +12,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MysqlPaymentDal implements IPaymentDal {
 
@@ -144,6 +146,46 @@ public class MysqlPaymentDal implements IPaymentDal {
 
         } catch (SQLException e) {
             response = new ResponseEntity(false, e.getLocalizedMessage());
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return response;
+    }
+
+    @Override
+    public ResponseEntity getAppointmentDetails(Long appointmentId) throws ConnectionException {
+        if (MysqlConnection.getInstance() == null) {
+            throw new ConnectionException();
+        }
+
+        ResponseEntity response = new ResponseEntity(false, "Randevu bulunamadı.");
+        String sql = "SELECT doctor_id, patient_id FROM et_appointment WHERE id = ?";
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+
+        try {
+            statement = MysqlConnection.getInstance().prepareStatement(sql);
+            statement.setLong(1, appointmentId);
+            resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                Map<String, String> data = new HashMap<>();
+                data.put("doctor_id", resultSet.getString("doctor_id"));
+                data.put("patient_id", resultSet.getString("patient_id"));
+                response = new ResponseEntity(true, "SUCCESS", data);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            response = new ResponseEntity(false, "Veritabanı hatası: " + e.getLocalizedMessage());
         } finally {
             try {
                 if (statement != null) {

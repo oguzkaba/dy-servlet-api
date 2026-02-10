@@ -1,5 +1,7 @@
 package com.kodlabs.doktorumyanimda.dto.doctor;
 
+import java.math.BigDecimal;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,4 +18,5 @@ public class ConsultationDoctorDTO {
     private int dayHourStart;
     private int dayHourEnd;
     private int dayMinutePeriod;
+    private BigDecimal appointmentPrice;
 }

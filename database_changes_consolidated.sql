@@ -10,7 +10,7 @@
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `et_appointment_price` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `doctor_id` VARCHAR(50) NOT NULL,
+  `doctor_id` VARCHAR(60) NOT NULL,
   `price` DECIMAL(10,2) NOT NULL DEFAULT '0.00',
   `isActive` TINYINT(1) DEFAULT '1',
   `created_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS `et_appointment_price` (
 CREATE TABLE IF NOT EXISTS `payments` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `appointment_id` BIGINT NOT NULL,
-  `patient_id` VARCHAR(50) NOT NULL,
+  `patient_id` VARCHAR(60) NOT NULL,
   `payment_id` VARCHAR(100) NOT NULL,
   `payment_transaction_id` VARCHAR(100) DEFAULT NULL,
   `price` DECIMAL(19,4) NOT NULL,
@@ -45,7 +45,7 @@ DROP PROCEDURE IF EXISTS `addPaymentRecord`;
 DELIMITER //
 CREATE PROCEDURE `addPaymentRecord`(
     IN p_appointment_id BIGINT,
-    IN p_patient_id VARCHAR(50),
+    IN p_patient_id VARCHAR(60),
     IN p_payment_id VARCHAR(100),
     IN p_payment_transaction_id VARCHAR(100),
     IN p_price DECIMAL(19,4),
@@ -85,8 +85,8 @@ DROP PROCEDURE IF EXISTS `getAppointmentFinalPrice`;
 
 DELIMITER //
 CREATE PROCEDURE `getAppointmentFinalPrice`(
-    IN p_doctor_id VARCHAR(50),
-    IN p_patient_id VARCHAR(50),
+    IN p_doctor_id VARCHAR(60),
+    IN p_patient_id VARCHAR(60),
     OUT p_final_price DECIMAL(10,2)
 )
 BEGIN
@@ -107,6 +107,7 @@ BEGIN
     LIMIT 1;
 
     -- 3. Hastanın bu doktorla daha önce aktif/tamamlanmış randevusu var mı?
+    -- NOT: appointment_status değerleri projenizdeki statülerle (ACTIVE, COMPLETED vb.) tam uyuşmalıdır.
     SELECT COUNT(*) INTO v_visit_count 
     FROM et_appointment 
     WHERE patient_id = p_patient_id 
