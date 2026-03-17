@@ -1,0 +1,17 @@
+# Secrets - local only
+eTetkik Server/src/main/webapp/WEB-INF/web.xml.local
+
+# Build output
+target/
+eTetkik Server/target/
+
+# IDE files
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
