@@ -1,28 +1,35 @@
 package com.kodlabs.doktorumyanimda.utils;
 
 import com.google.gson.Gson;
+import javax.servlet.ServletContext;
 
 public final class Common {
     public static final Gson gson = new Gson();
-    public static final boolean isLocal = false; // Set to false for production
+    public static final boolean isLocal = false;
     public static final String contentSource = isLocal ? "D:" : "";
     public static final String appName = "Doktorum Yanımda";
-    public static final String oneSignalAppID = "cebc0888-b542-4f03-b63e-003c37ea48b1";
-    public static final String oneSignalApiKey = "os_v2_app_z26arcfvijhqhnr6aa6dp2siwgvifige7wted2v54jsiu35shkwtcd72wd747nyh3na47ff32hjg4jlyhmbzy7h7uczldzd4pghxcia";
 
-    public static final String cryptKey = "2a46e69e-d511-4fbb-9b9f-5fc20fffc735";
+    // Secretler artık static field değil, inject edilecek
+    public static String oneSignalAppID;
+    public static String oneSignalApiKey;
+    public static String cryptKey;
 
-    /* Min-Max Values */
+    // Min-Max Values
     public static final int minorMaxValue = 100;
     public static final int minorMinValue = 50;
     public static final int majorMaxValue = 180;
-
     public static final int majorMinValue = 90;
     public static final int pulseMaxValue = 120;
     public static final int pulseMinValue = 50;
 
-    /* Average Value */
+    // Average Values
     public static final int minorAverageValue = 85;
     public static final int majorAverageValue = 135;
     public static final int pulseAverageValue = 90;
+
+    public static void init(ServletContext ctx) {
+        oneSignalAppID = ctx.getInitParameter("onesignal.app.id");
+        oneSignalApiKey = ctx.getInitParameter("onesignal.api.key");
+        cryptKey = ctx.getInitParameter("crypt.key");
+    }
 }
