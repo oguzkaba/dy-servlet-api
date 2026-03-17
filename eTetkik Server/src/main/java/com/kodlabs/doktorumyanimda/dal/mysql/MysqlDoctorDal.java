@@ -27,6 +27,7 @@ import com.kodlabs.doktorumyanimda.utils.Functions;
 import com.kodlabs.doktorumyanimda.utils.Role;
 import com.kodlabs.doktorumyanimda.utils.TextUtils;
 
+import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -1391,5 +1392,32 @@ public class MysqlDoctorDal implements IDoctorDal {
             e.printStackTrace();
         }
         return result;
+    }
+
+    @Override
+    public ResponseEntity updatePrice(String doctorID, BigDecimal price) throws ConnectionException {
+        if (MysqlConnection.getInstance() == null) {
+            throw new ConnectionException();
+        }
+        PreparedStatement statement = null;
+        ResponseEntity response;
+        try {
+            statement = MysqlConnection.getInstance().prepareStatement("{ CALL updateAppointmentPrice(?, ?) }");
+            statement.setString(1, doctorID);
+            statement.setBigDecimal(2, price);
+            statement.execute();
+            response = new ResponseEntity();
+        } catch (SQLException e) {
+            response = new ResponseEntity(false, e.getLocalizedMessage());
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return response;
     }
 }

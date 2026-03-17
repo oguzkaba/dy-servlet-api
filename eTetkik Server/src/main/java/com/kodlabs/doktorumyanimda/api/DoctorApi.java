@@ -3,6 +3,7 @@ package com.kodlabs.doktorumyanimda.api;
 import com.kodlabs.doktorumyanimda.controller.Managers;
 import com.kodlabs.doktorumyanimda.dto.doctor.ConsultationDoctorDTO;
 import com.kodlabs.doktorumyanimda.mapper.ModelMapper;
+import com.kodlabs.doktorumyanimda.messages.ErrorMessages;
 import com.kodlabs.doktorumyanimda.model.ResponseEntity;
 import com.kodlabs.doktorumyanimda.model.ResponseEntitySet;
 import com.kodlabs.doktorumyanimda.model.ckys.CkysRequest;
@@ -27,6 +28,8 @@ import com.kodlabs.doktorumyanimda.model.user.profile.DoctorProfileUpdate;
 import com.kodlabs.doktorumyanimda.model.user.profile.ProfileUpdateRequest;
 import com.kodlabs.doktorumyanimda.utils.AdminRole;
 import com.kodlabs.doktorumyanimda.utils.Functions;
+import com.kodlabs.doktorumyanimda.utils.Role;
+import com.kodlabs.doktorumyanimda.utils.TextUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -62,8 +65,9 @@ public class DoctorApi {
     @POST
     @Path("/login/verify")
     public ResponseEntitySet<UserDoctor> loginVerify(@Context HttpServletRequest hsr,
+            @Context javax.servlet.http.HttpServletResponse hsrResp,
             DoctorLoginVerifyRequest request) {
-        return Managers.doctorManager.loginVerify(request, hsr);
+        return Managers.doctorManager.loginVerify(request, hsr, hsrResp);
     }
 
     @GET
@@ -328,5 +332,26 @@ public class DoctorApi {
             @QueryParam("registrationNo") String registrationNo,
             @QueryParam("serialNo") String serialNo) {
         return Managers.doctorManager.calismaBilgisiSorgula(tcNo, registrationNo, serialNo);
+    }
+
+    @POST
+    @Path("/price")
+    public ResponseEntity updatePrice(DoctorPriceUpdateRequest request,
+            @Context HttpServletRequest hsr) {
+        String userID = Functions.getCookieValue(hsr, "userID");
+        String role = Functions.getCookieValue(hsr, "role");
+
+        if (TextUtils.isEmpty(userID)
+                || TextUtils.isEmpty(role)
+                || !role.equals(String.valueOf(Role.DOCTOR.value()))) {
+            return new ResponseEntity(false,
+                    ErrorMessages.notAccessUserInformation);
+        }
+
+        if (request == null || !request.isValid()) {
+            return new ResponseEntity(false, ErrorMessages.inValidData);
+        }
+
+        return Managers.doctorManager.updatePrice(userID, request.getPrice());
     }
 }

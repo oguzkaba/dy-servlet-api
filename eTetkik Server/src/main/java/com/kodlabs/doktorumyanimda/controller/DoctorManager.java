@@ -39,6 +39,7 @@ import com.kodlabs.doktorumyanimda.service.NVIService;
 import com.kodlabs.doktorumyanimda.utils.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -50,6 +51,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public class DoctorManager {
     private final IDoctorDal doctorDal;
@@ -223,19 +225,23 @@ public class DoctorManager {
         }
     }
 
-    public ResponseEntitySet<UserDoctor> loginVerify(DoctorLoginVerifyRequest request, HttpServletRequest hsr) {
+    public ResponseEntitySet<UserDoctor> loginVerify(DoctorLoginVerifyRequest request, HttpServletRequest hsr,
+            HttpServletResponse hsrResp) {
         if (!request.isValid()) {
             return new ResponseEntitySet<>(false, ErrorMessages.inValidData);
         }
         try {
             ResponseEntitySet<UserDoctor> response = this.doctorDal.loginVerify(request);
             if (response.isSuccess) {
+                hsrResp.addCookie(Functions.addCookie("userID", response.getData().getUserID()));
+                hsrResp.addCookie(Functions.addCookie("role", String.valueOf(Role.DOCTOR.value())));
+
                 doctorLogSend("loginVerify", request.getPhone(), Functions.getClientIpAddress(hsr),
                         Functions.getBrowserOrDevice(hsr), LogEventDescription.LOGIN.getMessage(), Role.DOCTOR);
             } else {
                 doctorLogSend("loginVerify", request.getPhone(), Functions.getClientIpAddress(hsr),
-                        Functions.getBrowserOrDevice(hsr),
-                        LogEventDescription.LOGIN_VERIFY_FAILED.getMessage(), Role.DOCTOR);
+                        Functions.getBrowserOrDevice(hsr), LogEventDescription.LOGIN_VERIFY_FAILED.getMessage(),
+                        Role.DOCTOR);
             }
             return response;
         } catch (ConnectionException e) {
@@ -851,6 +857,18 @@ public class DoctorManager {
             return new ResponseEntity();
         } catch (ConnectionException | SQLException e) {
             return new ResponseEntity(false, ErrorMessage.OPERATION_FAILED.getCode(), e.getLocalizedMessage());
+        }
+    }
+
+    public ResponseEntity updatePrice(String doctorID, BigDecimal price) {
+        if (TextUtils.isEmpty(doctorID) || price == null
+                || price.compareTo(BigDecimal.ZERO) < 0) {
+            return new ResponseEntity(false, ErrorMessages.inValidData);
+        }
+        try {
+            return this.doctorDal.updatePrice(doctorID, price);
+        } catch (ConnectionException e) {
+            return new ResponseEntity(false, e.getLocalizedMessage());
         }
     }
 }
