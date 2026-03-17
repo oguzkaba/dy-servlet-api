@@ -1,9 +1,8 @@
 # Secrets - local only
-eTetkik Server/src/main/webapp/WEB-INF/web.xml.local
+src/main/webapp/WEB-INF/web.xml.local
 
 # Build output
 target/
-eTetkik Server/target/
 
 # IDE files
 .idea/
