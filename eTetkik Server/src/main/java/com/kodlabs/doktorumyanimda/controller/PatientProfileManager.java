@@ -17,6 +17,8 @@ import com.kodlabs.doktorumyanimda.utils.TextUtils;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
 
+import javax.servlet.http.HttpServletRequest;
+
 public class PatientProfileManager {
     private final IPatientProfileDal profileDal;
 
@@ -24,98 +26,103 @@ public class PatientProfileManager {
         this.profileDal = profileDal;
     }
 
-    public ResponseEntitySet<PatientProfile> profile(String userID){
-        if(TextUtils.isEmpty(userID)){
+    public ResponseEntitySet<PatientProfile> profile(String userID) {
+        if (TextUtils.isEmpty(userID)) {
             return new ResponseEntitySet<>(false, ErrorMessages.inValidData);
         }
-        try{
-            if(Managers.userManager.isExistsUser(userID, Role.PATIENT.value())){
-                if(isExistsProfile(userID)){
+        try {
+            if (Managers.userManager.isExistsUser(userID, Role.PATIENT.value())) {
+                if (isExistsProfile(userID)) {
                     return this.profileDal.profile(userID);
-                }else{
+                } else {
                     return new ResponseEntitySet<>(false, ErrorMessages.notAccessProfileInformation);
                 }
-            }else{
+            } else {
                 return new ResponseEntitySet<>(false, ErrorMessages.notAccessUserInformation);
             }
-        }catch (ConnectionException | SQLException | NullPointerException e){
+        } catch (ConnectionException | SQLException | NullPointerException e) {
             return new ResponseEntitySet<>(false, e.getLocalizedMessage());
         }
     }
 
-    public ResponseEntity update(ProfileUpdateRequest<PatientProfile> request, String ip){
-        if(!request.isValid()){
+    public ResponseEntity update(ProfileUpdateRequest<PatientProfile> request, HttpServletRequest hsr) {
+        if (!request.isValid()) {
             return new ResponseEntity(false, ErrorMessages.inValidData);
         }
-        try{
-            if(Managers.userManager.isExistsUser(request.getUserID(), Role.PATIENT.value())){
+        try {
+            if (Managers.userManager.isExistsUser(request.getUserID(), Role.PATIENT.value())) {
                 ResponseEntity response;
-                if(isExistsProfile(request.getUserID())){
+                if (isExistsProfile(request.getUserID())) {
                     response = this.profileDal.updateProfile(request.getUserID(), request.getProfile());
-                }else{
+                } else {
                     response = create(request);
                 }
 
-                if(response.isSuccess){
-                    patientLogSend("update", request.getUserID(), ip, LogEventDescription.ACCOUNT_UPDATE.getMessage());
+                if (response.isSuccess) {
+                    patientLogSend("update", request.getUserID(), Functions.getClientIpAddress(hsr),
+                            Functions.getBrowserOrDevice(hsr), LogEventDescription.ACCOUNT_UPDATE.getMessage());
                 }
                 return response;
-            }else{
+            } else {
                 return new ResponseEntity(false, ErrorMessages.notAccessUserInformation);
             }
-        }catch (ConnectionException | SQLException | NullPointerException e){
+        } catch (ConnectionException | SQLException | NullPointerException e) {
             return new ResponseEntity(false, e.getLocalizedMessage());
         }
     }
-    private ResponseEntity create(ProfileUpdateRequest<PatientProfile> request){
-        if(!request.isValid()){
+
+    private ResponseEntity create(ProfileUpdateRequest<PatientProfile> request) {
+        if (!request.isValid()) {
             return new ResponseEntity(false, ErrorMessages.inValidData);
         }
-        try{
+        try {
             return this.profileDal.create(request.getUserID(), request.getProfile());
-        }catch (ConnectionException e ){
+        } catch (ConnectionException e) {
             return new ResponseEntity(false, e.getLocalizedMessage());
         }
     }
-    public ResponseEntitySet<Boolean> existsProfile(String userID){
-        if(TextUtils.isEmpty(userID)){
+
+    public ResponseEntitySet<Boolean> existsProfile(String userID) {
+        if (TextUtils.isEmpty(userID)) {
             return new ResponseEntitySet<>(false, ErrorMessages.inValidData);
         }
-        try{
+        try {
             return new ResponseEntitySet<>(isExistsProfile(userID));
-        }catch (ConnectionException | SQLException | NullPointerException e){
+        } catch (ConnectionException | SQLException | NullPointerException e) {
             return new ResponseEntitySet<>(false, e.getLocalizedMessage());
         }
     }
 
-    public boolean isExistsProfile(String userID) throws ConnectionException, SQLException, NullPointerException{
+    public boolean isExistsProfile(String userID) throws ConnectionException, SQLException, NullPointerException {
         if (TextUtils.isEmpty(userID)) {
             throw new NullPointerException(ErrorMessages.inValidData);
         }
         return this.profileDal.existsProfile(userID);
     }
 
-    public ResponseEntity updateV2(String patientID, PatientProfileUpdateV2 profile, String ip) {
-        if(TextUtils.isEmpty(patientID) || !profile.isValid()){
+    public ResponseEntity updateV2(String patientID, PatientProfileUpdateV2 profile, HttpServletRequest hsr) {
+        if (TextUtils.isEmpty(patientID) || !profile.isValid()) {
             return new ResponseEntity(false, ErrorMessages.inValidData);
         }
-        try{
-            if(Managers.userManager.isExistsUser(patientID, Role.PATIENT.value())){
-                ResponseEntity response =  this.profileDal.updateProfileV2(patientID, profile);
-                if(response.isSuccess){
-                    patientLogSend("updateV2", patientID, ip, LogEventDescription.ACCOUNT_UPDATE.getMessage());
+        try {
+            if (Managers.userManager.isExistsUser(patientID, Role.PATIENT.value())) {
+                ResponseEntity response = this.profileDal.updateProfileV2(patientID, profile);
+                if (response.isSuccess) {
+                    patientLogSend("updateV2", patientID, Functions.getClientIpAddress(hsr),
+                            Functions.getBrowserOrDevice(hsr), LogEventDescription.ACCOUNT_UPDATE.getMessage());
                 }
                 return response;
-            }else{
+            } else {
                 return new ResponseEntity(false, ErrorMessages.notAccessUserInformation);
             }
-        }catch (ConnectionException | NullPointerException e){
+        } catch (ConnectionException | NullPointerException e) {
             return new ResponseEntity(false, e.getLocalizedMessage());
         }
     }
 
-    private void patientLogSend(String methodName, String phoneOrUserID, String ip, String eventDescription){
-        new Thread(()->{
+    private void patientLogSend(String methodName, String phoneOrUserID, String ip, String browserOrDevice,
+            String eventDescription) {
+        new Thread(() -> {
             try {
                 Managers.logManager.create(
                         new Log(
@@ -126,11 +133,9 @@ public class PatientProfileManager {
                                 Role.PATIENT.value(),
                                 ip,
                                 Functions.getIpAddress(),
-                                eventDescription
-                        )
-                );
-            } catch (
-                    UnknownHostException e) {
+                                eventDescription,
+                                browserOrDevice));
+            } catch (UnknownHostException e) {
                 System.out.println(e.getLocalizedMessage());
             }
         }).start();

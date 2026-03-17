@@ -5,9 +5,6 @@ import com.kodlabs.doktorumyanimda.messages.ErrorMessages;
 import com.kodlabs.doktorumyanimda.messages.Messages;
 import com.kodlabs.doktorumyanimda.model.log.Log;
 import com.kodlabs.doktorumyanimda.model.log.LogEventDescription;
-import com.kodlabs.doktorumyanimda.model.message.Message;
-import com.kodlabs.doktorumyanimda.model.message.MessageContent;
-import com.kodlabs.doktorumyanimda.model.message.SendMessageRequest;
 import com.kodlabs.doktorumyanimda.model.notification.NotificationLog;
 import com.kodlabs.doktorumyanimda.notification.NotificationType;
 import com.kodlabs.doktorumyanimda.notification.Notifications;
@@ -25,31 +22,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 public class MessageManager {
     private IMessageDal messageDal;
 
-    public MessageManager(IMessageDal messageDal){
+    public MessageManager(IMessageDal messageDal) {
         this.messageDal = messageDal;
     }
 
-    public ResponseEntity sendMessage(SendMessageRequest request, String ip){
-        if(!request.isValid()){
+    public ResponseEntity sendMessage(SendMessageRequest request, HttpServletRequest hsr) {
+        if (!request.isValid()) {
             return new ResponseEntity(false, ErrorMessages.inValidData);
         }
-        try{
+        try {
             String messageID = isExistsMessage(request.getDoctorID(), request.getPatientID());
             ResponseEntitySet<String> response;
-            if(TextUtils.isEmpty(messageID)){
-                ResponseEntitySet<String> result = this.messageDal.createMessage(request.getDoctorID(), request.getPatientID());
-                if(result.isSuccess){
-                     response = this.messageDal.createMessageContent(result.getData(), request.getMessageContent());
-                }else{
+            if (TextUtils.isEmpty(messageID)) {
+                ResponseEntitySet<String> result = this.messageDal.createMessage(request.getDoctorID(),
+                        request.getPatientID());
+                if (result.isSuccess) {
+                    response = this.messageDal.createMessageContent(result.getData(), request.getMessageContent());
+                } else {
                     return result;
                 }
-            }else{
+            } else {
                 response = this.messageDal.createMessageContent(messageID, request.getMessageContent());
             }
-            if(response.isSuccess) {
+            if (response.isSuccess) {
                 new Thread(() -> {
                     NotificationLog log = new NotificationLog();
                     boolean sendDirection = request.getMessageContent().isDirection();
@@ -87,114 +87,125 @@ public class MessageManager {
                         String senderName, receiverName;
                         if (sendDirection) {
                             senderName = Functions.fullDoctorNameShortConvert(otherName);
-                            receiverName = Managers.userManager.getFullName(request.getPatientID(), Role.PATIENT.value());
+                            receiverName = Managers.userManager.getFullName(request.getPatientID(),
+                                    Role.PATIENT.value());
                             receiverName = Functions.fullPatientNameSortConvert(receiverName);
                         } else {
                             senderName = Functions.fullPatientNameSortConvert(otherName);
                             receiverName = Managers.userManager.getFullName(request.getDoctorID(), Role.DOCTOR.value());
                             receiverName = Functions.fullDoctorNameShortConvert(receiverName);
                         }
-                        EventsFunctions.MessageEvent(receiverName, senderName, request.getMessageContent().getContent().getContent());
+                        EventsFunctions.MessageEvent(receiverName, senderName,
+                                request.getMessageContent().getContent().getContent());
                     }
                 }).start();
                 if (request.getMessageContent().isDirection()) {
                     String fullName = Managers.userManager.getFullName(request.getPatientID(), Role.PATIENT.value());
                     messageLog("sendMessage", request.getDoctorID(), Role.DOCTOR.value(),
-                            ip,
-                            String.format(LogEventDescription.MESSAGE.getMessage(), TextUtils.isEmpty(fullName) ? request.getPatientID() : fullName));
+                            Functions.getClientIpAddress(hsr),
+                            Functions.getBrowserOrDevice(hsr),
+                            String.format(LogEventDescription.MESSAGE.getMessage(),
+                                    TextUtils.isEmpty(fullName) ? request.getPatientID() : fullName));
                 } else {
                     String fullName = Managers.userManager.getFullName(request.getDoctorID(), Role.DOCTOR.value());
                     messageLog("sendMessage", request.getPatientID(), Role.PATIENT.value(),
-                            ip,
-                            String.format(LogEventDescription.MESSAGE.getMessage(), TextUtils.isEmpty(fullName) ? request.getPatientID() : fullName));
+                            Functions.getClientIpAddress(hsr),
+                            Functions.getBrowserOrDevice(hsr),
+                            String.format(LogEventDescription.MESSAGE.getMessage(),
+                                    TextUtils.isEmpty(fullName) ? request.getPatientID() : fullName));
                 }
             }
             return response;
-        }catch (ConnectionException e){
+        } catch (ConnectionException e) {
             return new ResponseEntity(false, e.getLocalizedMessage());
         }
     }
-    public String isExistsMessage(String doctorID, String patientID) throws ConnectionException{
+
+    public String isExistsMessage(String doctorID, String patientID) throws ConnectionException {
         return this.messageDal.existsMessage(doctorID, patientID);
     }
 
-    public ResponseEntitySet<List<Message>> getAllMessages(String userID, Byte role){
-        if(TextUtils.isEmpty(userID) || role == null)
+    public ResponseEntitySet<List<Message>> getAllMessages(String userID, Byte role) {
+        if (TextUtils.isEmpty(userID) || role == null)
             return new ResponseEntitySet<>(false, ErrorMessages.inValidData);
-        try{
-            if(Managers.userManager.isExistsUser(userID, role)){
+        try {
+            if (Managers.userManager.isExistsUser(userID, role)) {
                 return this.messageDal.getAllMessage(userID, role);
-            }else{
+            } else {
                 return new ResponseEntitySet<>(false, ErrorMessages.notAccessUserInformation);
             }
-        }catch (ConnectionException e){
+        } catch (ConnectionException e) {
             return new ResponseEntitySet<>(false, e.getLocalizedMessage());
         }
     }
 
-    public ResponseEntitySet<Message> getMessageInformation(String doctorID, String patientID, Byte role){
-        if(TextUtils.isEmpty(doctorID) || TextUtils.isEmpty(patientID) || role == null)
+    public ResponseEntitySet<Message> getMessageInformation(String doctorID, String patientID, Byte role) {
+        if (TextUtils.isEmpty(doctorID) || TextUtils.isEmpty(patientID) || role == null)
             return new ResponseEntitySet<>(false, ErrorMessages.inValidData);
-        try{
+        try {
             return this.messageDal.getMessage(doctorID, patientID, role);
-        }catch (ConnectionException e){
+        } catch (ConnectionException e) {
             return new ResponseEntitySet<>(false, e.getLocalizedMessage());
         }
     }
 
-    public ResponseEntitySet<List<MessageContent>> getMessageContents(String messageID, int lastID){
-        if(TextUtils.isEmpty(messageID))
+    public ResponseEntitySet<List<MessageContent>> getMessageContents(String messageID, int lastID) {
+        if (TextUtils.isEmpty(messageID))
             return new ResponseEntitySet<>(false, ErrorMessages.inValidData);
-        try{
+        try {
             return this.messageDal.getMessageContent(messageID, lastID);
-        }catch (ConnectionException e){
+        } catch (ConnectionException e) {
             return new ResponseEntitySet<>(false, e.getLocalizedMessage());
         }
     }
-    public ResponseEntity updateMessageAttribute(String messageID, String attribute, Object value){
-        if(TextUtils.isEmpty(messageID) || TextUtils.isEmpty(attribute) || value == null){
+
+    public ResponseEntity updateMessageAttribute(String messageID, String attribute, Object value) {
+        if (TextUtils.isEmpty(messageID) || TextUtils.isEmpty(attribute) || value == null) {
             return new ResponseEntity(false, ErrorMessages.inValidData);
         }
-        try{
+        try {
             return this.messageDal.updateAttribute(messageID, attribute, value);
-        }catch (ConnectionException e){
+        } catch (ConnectionException e) {
             return new ResponseEntity(false, e.getLocalizedMessage());
         }
     }
-    public ResponseEntity updateMessageAttributes(String messageID, Map<String,Object> attributes){
-        if(TextUtils.isEmpty(messageID) || attributes == null || attributes.isEmpty()){
+
+    public ResponseEntity updateMessageAttributes(String messageID, Map<String, Object> attributes) {
+        if (TextUtils.isEmpty(messageID) || attributes == null || attributes.isEmpty()) {
             return new ResponseEntity(false, ErrorMessages.inValidData);
         }
-        try{
+        try {
             return this.messageDal.updateAttributes(messageID, attributes);
-        }catch (ConnectionException e){
+        } catch (ConnectionException e) {
             return new ResponseEntity(false, e.getLocalizedMessage());
         }
     }
-    public ResponseEntitySet<Integer> isUnReadsMessageCount(String userID,Byte role){
-        if(TextUtils.isEmpty(userID) || role == null || role < 0) {
+
+    public ResponseEntitySet<Integer> isUnReadsMessageCount(String userID, Byte role) {
+        if (TextUtils.isEmpty(userID) || role == null || role < 0) {
             return new ResponseEntitySet<>(false, ErrorMessages.inValidData);
         }
-        try{
+        try {
             return this.messageDal.isUnReadMessageCount(userID, role);
-        }catch (ConnectionException e){
+        } catch (ConnectionException e) {
             return new ResponseEntitySet<>(false, e.getLocalizedMessage());
         }
     }
 
     public ResponseEntitySet<Boolean> messageIsActive(String messageID) {
-        if(TextUtils.isEmpty(messageID)){
+        if (TextUtils.isEmpty(messageID)) {
             return new ResponseEntitySet<>(false, ErrorMessages.inValidData);
         }
-        try{
+        try {
             return this.messageDal.messageIsActive(messageID);
-        }catch (ConnectionException e){
+        } catch (ConnectionException e) {
             return new ResponseEntitySet<>(false, e.getLocalizedMessage());
         }
     }
 
-    private void messageLog(String methodName, String phoneOrUserID, byte role, String ip, String eventDescription){
-        new Thread(()->{
+    private void messageLog(String methodName, String phoneOrUserID, byte role, String ip, String browserOrDevice,
+            String eventDescription) {
+        new Thread(() -> {
             try {
                 Managers.logManager.create(
                         new Log(
@@ -205,11 +216,9 @@ public class MessageManager {
                                 role,
                                 ip,
                                 Functions.getIpAddress(),
-                                eventDescription
-                        )
-                );
-            } catch (
-                    UnknownHostException e) {
+                                eventDescription,
+                                browserOrDevice));
+            } catch (UnknownHostException e) {
                 System.out.println(e.getLocalizedMessage());
             }
         }).start();

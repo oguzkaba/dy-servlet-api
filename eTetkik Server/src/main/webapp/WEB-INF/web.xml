@@ -53,4 +53,18 @@
         <filter-name>UserLogin</filter-name>
         <url-pattern>/account/*</url-pattern>
     </filter-mapping>
+
+    <!-- SECRET VALUES - pipeline tarafından inject edilir -->
+    <context-param>
+        <param-name>onesignal.app.id</param-name>
+        <param-value>ONESIGNAL_APP_ID_PLACEHOLDER</param-value>
+    </context-param>
+    <context-param>
+        <param-name>onesignal.api.key</param-name>
+        <param-value>ONESIGNAL_API_KEY_PLACEHOLDER</param-value>
+    </context-param>
+    <context-param>
+        <param-name>crypt.key</param-name>
+        <param-value>CRYPT_KEY_PLACEHOLDER</param-value>
+    </context-param>
 </web-app>

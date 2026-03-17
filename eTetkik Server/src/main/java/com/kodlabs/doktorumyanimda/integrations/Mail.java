@@ -17,29 +17,32 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
-class Mail implements IIntegrations{
+class Mail implements IIntegrations {
     private MailData entity;
-    public Mail(MailData data){
+
+    public Mail(MailData data) {
         this.entity = data;
     }
+
     @Override
     public boolean sendMessage() {
         try {
             MimeMessage mimeMessage = createMimeMessage();
-            sendMessage(GmailService.getGmailService(),mimeMessage);
+            sendMessage(GmailService.getGmailService(), mimeMessage);
             return true;
         } catch (MessagingException | IOException e) {
             e.printStackTrace();
             return false;
         }
     }
+
     private MimeMessage createMimeMessage() throws MessagingException, UnsupportedEncodingException {
         Properties properties = new Properties();
         Session session = Session.getInstance(properties, null);
         MimeMessage message = new MimeMessage(session);
         message.setFrom(getAddress(entity.type));
         message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(entity.address));
-        message.setSubject(entity.title,"utf-8");
+        message.setSubject(entity.title, "utf-8");
         MimeBodyPart bodyPart = new MimeBodyPart();
         bodyPart.setContent(getContent(entity), "text/html;charset=utf-8");
         Multipart multipart = new MimeMultipart();
@@ -47,6 +50,7 @@ class Mail implements IIntegrations{
         message.setContent(multipart);
         return message;
     }
+
     private Message createMessageWithEmail(MimeMessage mailContent)
             throws MessagingException, IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -63,31 +67,41 @@ class Mail implements IIntegrations{
         message = service.users().messages().send("me", message).execute();
         return message;
     }
+
     private InternetAddress getAddress(String type) throws AddressException, UnsupportedEncodingException {
         InternetAddress address = null;
-        switch (MailTypes.findType(type)){
+        switch (MailTypes.findType(type)) {
             case SUPPORT:
             case VERIFY:
-                address = new InternetAddress("support@azurerobot.com");
+                address = new InternetAddress("support@azurerobot.com", "Doktorum Yanimda Destek", "utf-8");
                 address.setPersonal("destek");
                 break;
         }
         return address;
     }
-    private String getContent(MailData entity){
+
+    private String getContent(MailData entity) {
         final String path;
         String contentData;
         String data;
-        switch (MailTypes.findType(entity.type)){
+        // Daha sonra farklı mail içerikleri eklenebilir
+        switch (MailTypes.findType(entity.type)) {
             case SUPPORT:
-                path = Common.contentSource.concat( "/mail-content/reset-password.html");
-                contentData =  Functions.getFileContent(path);
-                data = String.format(contentData,entity.message);
+                path = Common.contentSource.concat("/apps/eTetkik/mail-contents/reset-password.html");
+                contentData = Functions.getFileContent(path);
+                // eklenecek-önemli not: mail içeriğinde % işareti varsa hata veriyor. O yüzden
+                // % işaretini %% yapıyoruz.
+                String safeTemplate = contentData.replace("%", "%%");
+                data = String.format(safeTemplate, entity.message);
                 break;
             case VERIFY:
-                path = Common.contentSource.concat( "/mail-contents/verification_email.html");
-                contentData =  Functions.getFileContent(path);
-                data = String.format(contentData, entity.message);
+                path = Common.contentSource.concat("/apps/eTetkik/mail-contents/new_account.html");
+                contentData = Functions.getFileContent(path);
+                // eklenecek-önemli not: mail içeriğinde % işareti varsa hata veriyor. O yüzden
+                // % işaretini %% yapıyoruz.
+                String safeVTemplate = contentData.replace("%", "%%");
+                safeVTemplate = safeVTemplate.replace("{{USERNAME}}", "" + entity.userName + "");
+                data = String.format(safeVTemplate, entity.message);
                 break;
             default:
                 data = "";

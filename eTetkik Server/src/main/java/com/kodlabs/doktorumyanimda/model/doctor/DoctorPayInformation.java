@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.math.BigDecimal;
+
 @Setter
 @Getter
 @NoArgsConstructor
@@ -28,4 +30,5 @@ public class DoctorPayInformation {
     private int dayHourStart;
     private int dayHourEnd;
     private int dayMinutePeriod;
+    private BigDecimal appointmentPrice;
 }

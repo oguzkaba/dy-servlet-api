@@ -22,4 +22,5 @@ public class DoctorInformation {
     private int dayHourStart;
     private int dayHourEnd;
     private int dayMinutePeriod;
+    private java.math.BigDecimal appointmentPrice;
 }

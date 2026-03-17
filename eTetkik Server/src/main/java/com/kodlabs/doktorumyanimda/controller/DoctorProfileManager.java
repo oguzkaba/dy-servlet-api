@@ -18,6 +18,8 @@ import com.kodlabs.doktorumyanimda.utils.TextUtils;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
 
+import javax.servlet.http.HttpServletRequest;
+
 public class DoctorProfileManager {
     private IDoctorProfileDal iDoctorProfileDal;
 
@@ -25,81 +27,86 @@ public class DoctorProfileManager {
         this.iDoctorProfileDal = iDoctorProfileDal;
     }
 
-    public ResponseEntitySet<DoctorProfile> profile(String userID){
-        if(TextUtils.isEmpty(userID)){
+    public ResponseEntitySet<DoctorProfile> profile(String userID) {
+        if (TextUtils.isEmpty(userID)) {
             return new ResponseEntitySet<>(false, ErrorMessages.inValidData);
         }
-        try{
-            if(Managers.userManager.isExistsUser(userID, Role.DOCTOR.value())){
-                if(isExists(userID)){
+        try {
+            if (Managers.userManager.isExistsUser(userID, Role.DOCTOR.value())) {
+                if (isExists(userID)) {
                     return this.iDoctorProfileDal.profile(userID);
-                }else{
+                } else {
                     return new ResponseEntitySet<>(false, ErrorMessages.notAccessProfileInformation);
                 }
-            }else{
+            } else {
                 return new ResponseEntitySet<>(false, ErrorMessages.notAccessUserInformation);
             }
-        }catch (ConnectionException | SQLException | NullPointerException e){
+        } catch (ConnectionException | SQLException | NullPointerException e) {
             return new ResponseEntitySet<>(false, e.getLocalizedMessage());
         }
     }
 
-    public ResponseEntity update(ProfileUpdateRequest<DoctorProfile> request, String ip){
-        if(!request.isValid()){
+    public ResponseEntity update(ProfileUpdateRequest<DoctorProfile> request, HttpServletRequest hsr) {
+        if (!request.isValid()) {
             return new ResponseEntity(false, ErrorMessages.inValidData);
         }
-        try{
-            if(Managers.userManager.isExistsUser(request.getUserID(), Role.DOCTOR.value())){
-                if(isExists(request.getUserID())){
-                    ResponseEntity response = this.iDoctorProfileDal.updateProfile(request.getUserID(), request.getProfile());
-                    if(response.isSuccess){
-                        doctorLogSend("update", request.getUserID(), ip, LogEventDescription.ACCOUNT_UPDATE.getMessage());
+        try {
+            if (Managers.userManager.isExistsUser(request.getUserID(), Role.DOCTOR.value())) {
+                if (isExists(request.getUserID())) {
+                    ResponseEntity response = this.iDoctorProfileDal.updateProfile(request.getUserID(),
+                            request.getProfile());
+                    if (response.isSuccess) {
+                        doctorLogSend("update", request.getUserID(), Functions.getClientIpAddress(hsr),
+                                Functions.getBrowserOrDevice(hsr), LogEventDescription.ACCOUNT_UPDATE.getMessage());
                     }
                     return response;
-                }else{
+                } else {
                     return new ResponseEntity(false, ErrorMessages.notAccessProfileInformation);
                 }
-            }else{
+            } else {
                 return new ResponseEntity(false, ErrorMessages.notAccessUserInformation);
             }
-        }catch (ConnectionException | SQLException | NullPointerException e){
+        } catch (ConnectionException | SQLException | NullPointerException e) {
             return new ResponseEntity(false, e.getLocalizedMessage());
         }
     }
 
-    public boolean isExists(String userID) throws ConnectionException, SQLException, NullPointerException{
+    public boolean isExists(String userID) throws ConnectionException, SQLException, NullPointerException {
         if (TextUtils.isEmpty(userID)) {
             throw new NullPointerException(ErrorMessages.inValidData);
         }
         return this.iDoctorProfileDal.existsProfile(userID);
     }
 
-    public ResponseEntity updateV2(String doctorID, DoctorProfileUpdate profileUpdate, String ip) {
-        if(TextUtils.isEmpty(doctorID) || !profileUpdate.isValid()){
+    public ResponseEntity updateV2(String doctorID, DoctorProfileUpdate profileUpdate, HttpServletRequest hsr) {
+        if (TextUtils.isEmpty(doctorID) || !profileUpdate.isValid()) {
             return new ResponseEntity(false, ErrorMessages.inValidData);
         }
-        if(!Patterns.PHONE.matcher(profileUpdate.getPhone()).matches()){
+        if (!Patterns.PHONE.matcher(profileUpdate.getPhone()).matches()) {
             return new ResponseEntity(false, ErrorMessages.inValidPhone);
         }
-        if(!Patterns.EMAIL.matcher(profileUpdate.getMail()).matches()){
+        if (!Patterns.EMAIL.matcher(profileUpdate.getMail()).matches()) {
             return new ResponseEntity(false, ErrorMessages.inValidEmail);
         }
-        try{
-            if(Managers.userManager.isExistsUser(doctorID, Role.DOCTOR.value())){
+        try {
+            if (Managers.userManager.isExistsUser(doctorID, Role.DOCTOR.value())) {
                 ResponseEntity response = this.iDoctorProfileDal.updateProfileV2(doctorID, profileUpdate);
-                if(response.isSuccess){
-                    doctorLogSend("updateV2", doctorID, ip, LogEventDescription.ACCOUNT_UPDATE.getMessage());
+                if (response.isSuccess) {
+                    doctorLogSend("updateV2", doctorID, Functions.getClientIpAddress(hsr),
+                            Functions.getBrowserOrDevice(hsr), LogEventDescription.ACCOUNT_UPDATE.getMessage());
                 }
                 return response;
-            }else{
+            } else {
                 return new ResponseEntity(false, ErrorMessages.notAccessUserInformation);
             }
-        }catch (ConnectionException | NullPointerException e){
+        } catch (ConnectionException | NullPointerException e) {
             return new ResponseEntity(false, e.getLocalizedMessage());
         }
     }
-    private void doctorLogSend(String methodName, String phoneOrUserID, String ip, String eventDescription){
-        new Thread(()->{
+
+    private void doctorLogSend(String methodName, String phoneOrUserID, String ip, String browserOrDevice,
+            String eventDescription) {
+        new Thread(() -> {
             try {
                 Managers.logManager.create(
                         new Log(
@@ -110,11 +117,9 @@ public class DoctorProfileManager {
                                 Role.DOCTOR.value(),
                                 ip,
                                 Functions.getIpAddress(),
-                                eventDescription
-                        )
-                );
-            } catch (
-                    UnknownHostException e) {
+                                eventDescription,
+                                browserOrDevice));
+            } catch (UnknownHostException e) {
                 System.out.println(e.getLocalizedMessage());
             }
         }).start();

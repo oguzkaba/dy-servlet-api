@@ -20,71 +20,93 @@ import com.kodlabs.doktorumyanimda.model.social.SocialShare;
 import com.kodlabs.doktorumyanimda.model.user.LoginData;
 import com.kodlabs.doktorumyanimda.model.user.UserDoctor;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
 public interface IDoctorDal {
-    ResponseEntitySet<List<DoctorInformationForAdmin>> list(String userID, byte role) throws ConnectionException;
-    ResponseEntitySet<List<DoctorInformation>> notAnonymousList(String branch, String city, String os) throws ConnectionException;
-    ResponseEntitySet<DoctorInformation> information(String doctorID) throws ConnectionException;
-    ResponseEntitySet<DoctorPayInformation> payInformation(String code) throws ConnectionException;
-    ResponseEntity update(DoctorUpdateRequest request) throws ConnectionException;
+        ResponseEntitySet<List<DoctorInformationForAdmin>> list(String userID, byte role) throws ConnectionException;
 
-    ResponseEntitySet<Contact> contact(String userID) throws ConnectionException;
+        ResponseEntitySet<List<DoctorInformation>> notAnonymousList(String branch, String city, String os)
+                        throws ConnectionException;
 
-    ResponseEntitySet<LoginData> login(DoctorLoginV2Request request, String code) throws ConnectionException;
-    ResponseEntitySet<UserDoctor> loginVerify(DoctorLoginVerifyRequest request)  throws ConnectionException;
-    ResponseEntity register(DoctorRegister request)  throws ConnectionException;
-    boolean isExistsID(String ID) throws ConnectionException;
-    ResponseEntity changePassword(ChangePasswordRequest request) throws ConnectionException;
+        ResponseEntitySet<DoctorInformation> information(String doctorID) throws ConnectionException;
 
-    ResponseEntitySet<DoctorDetail> detail(String doctorID) throws ConnectionException;
-    ResponseEntity detailUpdate(DoctorDetailUpdateRequest request) throws ConnectionException;
+        ResponseEntitySet<DoctorPayInformation> payInformation(String code) throws ConnectionException;
 
-    /* Peak Fee */
-    ResponseEntitySet<List<PeakFeeDetail>> peakFeeDetail(String doctorID) throws ConnectionException;
-    ResponseEntity peakFeeDetailUpdate(PeakFeeRequest request) throws ConnectionException;
-    ResponseEntitySet<String> peakFeeDetailAdd(PeakFeeRequest request) throws ConnectionException;
-    ResponseEntity peakFeeDetailDelete(String doctorID, String id) throws ConnectionException;
+        ResponseEntity update(DoctorUpdateRequest request) throws ConnectionException;
 
-    ResponseEntitySet<String> updateVerifyCode(String phone, String verifyCode) throws ConnectionException;
+        ResponseEntitySet<Contact> contact(String userID) throws ConnectionException;
 
-    ResponseEntitySet<Integer> drBalance(String doctorID) throws ConnectionException;
+        ResponseEntitySet<LoginData> login(DoctorLoginV2Request request, String code) throws ConnectionException;
 
-    ResponseEntitySet<List<SocialAccount>> socialAccounts(String userID) throws ConnectionException;
-    ResponseEntity socialAccountDelete(String id) throws ConnectionException;
-    ResponseEntitySet<String> socialAccountAdd(SocialRequest<SocialAccount> request) throws ConnectionException;
+        ResponseEntitySet<UserDoctor> loginVerify(DoctorLoginVerifyRequest request) throws ConnectionException;
 
-    ResponseEntitySet<List<SocialShare>> socialShares(String userID) throws ConnectionException;
-    ResponseEntity socialShareDelete(String id) throws ConnectionException;
-    ResponseEntitySet<String> socialShareAdd(SocialRequest<SocialShare> request) throws ConnectionException;
+        ResponseEntity register(DoctorRegister request) throws ConnectionException;
 
-    ResponseEntitySet<List<String>> doctorAvailableCities() throws ConnectionException;
+        boolean isExistsID(String ID) throws ConnectionException;
 
-    ResponseEntity contractAccept(String uNameOrDoctorID) throws ConnectionException;
+        ResponseEntity changePassword(ChangePasswordRequest request) throws ConnectionException;
 
-    byte isContractAccepted(String uNameOrDoctorID) throws SQLException, ConnectionException;
+        ResponseEntitySet<DoctorDetail> detail(String doctorID) throws ConnectionException;
 
-    ResponseEntitySet<Integer> peakDemandCount(String doctorID) throws ConnectionException;
+        ResponseEntity detailUpdate(DoctorDetailUpdateRequest request) throws ConnectionException;
 
+        /* Peak Fee */
+        ResponseEntitySet<List<PeakFeeDetail>> peakFeeDetail(String doctorID) throws ConnectionException;
 
-    ResponseEntitySet<List<Branch>> branches() throws ConnectionException;
+        ResponseEntity peakFeeDetailUpdate(PeakFeeRequest request) throws ConnectionException;
 
-    ResponseEntitySet<LoginData> loginV2(DoctorLoginV2Request request, String verifyCode) throws ConnectionException;
+        ResponseEntitySet<String> peakFeeDetailAdd(PeakFeeRequest request) throws ConnectionException;
 
-    ResponseEntity delete(String userID, byte role, String doctorID) throws ConnectionException;
+        ResponseEntity peakFeeDetailDelete(String doctorID, String id) throws ConnectionException;
 
-    ResponseEntitySet<DoctorAllDetail> allDetail(String userID, Byte userRole, String doctorID) throws ConnectionException;
+        ResponseEntitySet<String> updateVerifyCode(String phone, String verifyCode) throws ConnectionException;
 
-    ResponseEntity updateSideAdmin(String userID, byte role, DoctorBaseProfile profile) throws ConnectionException;
+        ResponseEntitySet<Integer> drBalance(String doctorID) throws ConnectionException;
 
+        ResponseEntitySet<List<SocialAccount>> socialAccounts(String userID) throws ConnectionException;
 
-    Optional<DoctorRecipeInformation> recipeInformation(String userID) throws ConnectionException;
+        ResponseEntity socialAccountDelete(String id) throws ConnectionException;
 
-    boolean isExistsRecipeInformation(String userID) throws ConnectionException, SQLException;
+        ResponseEntitySet<String> socialAccountAdd(SocialRequest<SocialAccount> request) throws ConnectionException;
 
-    void recipeInformationCreate(DoctorRecipeInformationCreate doctorRecipeInformationCreate) throws ConnectionException, SQLException;
+        ResponseEntitySet<List<SocialShare>> socialShares(String userID) throws ConnectionException;
 
-    void recipeInformationUpdate(DoctorRecipeInformationCreate doctorRecipeInformationCreate) throws ConnectionException, SQLException;
+        ResponseEntity socialShareDelete(String id) throws ConnectionException;
+
+        ResponseEntitySet<String> socialShareAdd(SocialRequest<SocialShare> request) throws ConnectionException;
+
+        ResponseEntitySet<List<String>> doctorAvailableCities() throws ConnectionException;
+
+        ResponseEntity contractAccept(String uNameOrDoctorID) throws ConnectionException;
+
+        byte isContractAccepted(String uNameOrDoctorID) throws SQLException, ConnectionException;
+
+        ResponseEntitySet<Integer> peakDemandCount(String doctorID) throws ConnectionException;
+
+        ResponseEntitySet<List<Branch>> branches() throws ConnectionException;
+
+        ResponseEntitySet<LoginData> loginV2(DoctorLoginV2Request request, String verifyCode)
+                        throws ConnectionException;
+
+        ResponseEntity delete(String userID, byte role, String doctorID) throws ConnectionException;
+
+        ResponseEntitySet<DoctorAllDetail> allDetail(String userID, Byte userRole, String doctorID)
+                        throws ConnectionException;
+
+        ResponseEntity updateSideAdmin(String userID, byte role, DoctorBaseProfile profile) throws ConnectionException;
+
+        Optional<DoctorRecipeInformation> recipeInformation(String userID) throws ConnectionException;
+
+        boolean isExistsRecipeInformation(String userID) throws ConnectionException, SQLException;
+
+        void recipeInformationCreate(DoctorRecipeInformationCreate doctorRecipeInformationCreate)
+                        throws ConnectionException, SQLException;
+
+        void recipeInformationUpdate(DoctorRecipeInformationCreate doctorRecipeInformationCreate)
+                        throws ConnectionException, SQLException;
+
+        ResponseEntity updatePrice(String doctorID, BigDecimal price) throws ConnectionException;
 }

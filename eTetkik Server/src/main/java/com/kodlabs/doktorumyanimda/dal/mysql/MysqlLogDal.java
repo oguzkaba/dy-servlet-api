@@ -16,13 +16,13 @@ import java.util.List;
 public class MysqlLogDal implements ILogDal {
     @Override
     public ResponseEntity create(Log log) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResponseEntity response;
-        try{
-            statement = MysqlConnection.getInstance().prepareStatement("{ CALL createLog(?, ?, ?, ?, ?, ?, ?, ?) }");
+        try {
+            statement = MysqlConnection.getInstance().prepareStatement("{ CALL createLog(?, ?, ?, ?, ?, ?, ?, ?,?) }");
             statement.setString(1, log.getPackageName());
             statement.setString(2, log.getClassName());
             statement.setString(3, log.getMethodName());
@@ -30,17 +30,18 @@ public class MysqlLogDal implements ILogDal {
             statement.setByte(5, log.getUserType());
             statement.setString(6, log.getSourceIp());
             statement.setString(7, log.getTargetIp());
-            statement.setString(8, log.getEventDescription());
+            statement.setString(8, log.getBrowserOrDevice());
+            statement.setString(9, log.getEventDescription());
             statement.execute();
             response = new ResponseEntity();
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntity();
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -49,19 +50,19 @@ public class MysqlLogDal implements ILogDal {
 
     @Override
     public ResponseEntitySet<List<Log>> logs(String startDateTime, String endDateTime) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<List<Log>> response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL logList(?, ?)}");
             statement.setString(1, startDateTime);
             statement.setString(2, endDateTime);
             resultSet = statement.executeQuery();
             List<Log> logs = new ArrayList<>();
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 logs.add(
                         new Log(
                                 resultSet.getInt("id"),
@@ -73,22 +74,21 @@ public class MysqlLogDal implements ILogDal {
                                 resultSet.getString("source_ip"),
                                 resultSet.getString("target_ip"),
                                 resultSet.getString("event_description"),
-                                Functions.timeStampToLocalDateTime(resultSet.getTimestamp("createDate"), "GMT+3")
-                        )
-                );
+                                resultSet.getString("browser_or_device"),
+                                Functions.timeStampToLocalDateTime(resultSet.getTimestamp("createDate"), "GMT+3")));
             }
             response = new ResponseEntitySet<>(logs);
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }

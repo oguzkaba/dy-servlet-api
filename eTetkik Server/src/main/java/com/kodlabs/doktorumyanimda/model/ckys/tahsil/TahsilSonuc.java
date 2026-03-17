@@ -1,12 +1,10 @@
 package com.kodlabs.doktorumyanimda.model.ckys.tahsil;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.xml.bind.annotation.*;
 import java.io.Serializable;
 
 @Data

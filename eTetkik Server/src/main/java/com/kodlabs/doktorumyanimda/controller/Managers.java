@@ -18,6 +18,8 @@ public class Managers {
     public static AppSettingManager appSettingManager;
     public static VideoChatManager videoChatManager;
     public static CityManager cityManager;
+    public static ReviewsManager reviewsManager;
+    public static PaymentManager paymentManager;
 
     public static LogManager logManager;
 }

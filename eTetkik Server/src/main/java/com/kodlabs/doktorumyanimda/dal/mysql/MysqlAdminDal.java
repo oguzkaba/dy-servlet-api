@@ -17,35 +17,35 @@ import java.sql.SQLException;
 public class MysqlAdminDal implements IAdminDal {
     @Override
     public String login(AdminLoginRequest request) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null) {
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
 
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         String phone = null;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL adminLogin(?, ?) }"); // password verify
             statement.setString(1, request.getUname());
-            statement.setString(2, Functions.toSHA1(request.getPassword()));
+            statement.setString(2, Functions.toSHA256(request.getPassword()));
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 boolean isVerify = resultSet.getBoolean("isVerify");
-                if(isVerify){
+                if (isVerify) {
                     phone = resultSet.getString("phone");
                 }
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new ConnectionException(e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null) {
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -54,33 +54,33 @@ public class MysqlAdminDal implements IAdminDal {
 
     @Override
     public ResponseEntitySet<String> verifyCodeUpdate(String uname, String code) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         ResponseEntitySet<String> response;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL adminVerifyCodeUpdate(?, ?) }");
             statement.setString(1, uname);
             statement.setString(2, code);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 response = new ResponseEntitySet<>(resultSet.getString("code"));
-            }else{
+            } else {
                 throw new SQLException(ErrorMessages.notAccessUserInformation);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -89,43 +89,44 @@ public class MysqlAdminDal implements IAdminDal {
 
     @Override
     public Object verifyCode(String uname, String code) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         Object response;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL adminVerifyCode(?, ?) }");
             statement.setString(1, uname);
             statement.setString(2, code);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 String role = resultSet.getString("role");
-                switch (AdminRole.getAdminRole(role)){
+                switch (AdminRole.getAdminRole(role)) {
                     case WEB_ADMIN:
                         response = new ResponseEntitySet<>(new UserWebAdmin(resultSet.getString("userID"), role));
-                      break;
+                        break;
                     case FACILITY_ADMIN:
-                        response = new ResponseEntitySet<>(new UserFacilityAdmin(resultSet.getString("facilityName"), role, resultSet.getString("userID")));
-                      break;
+                        response = new ResponseEntitySet<>(new UserFacilityAdmin(resultSet.getString("facilityName"),
+                                role, resultSet.getString("userID")));
+                        break;
                     default:
-                      response = null;
+                        response = null;
                 }
-            }else{
+            } else {
                 throw new SQLException(ErrorMessages.notAccessUserInformation);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -134,31 +135,31 @@ public class MysqlAdminDal implements IAdminDal {
 
     @Override
     public String isExists(String unameOrUserID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         String result = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL adminExists(?, ?) }");
             statement.setString(1, unameOrUserID);
             statement.setString(2, unameOrUserID);
-             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
                 result = resultSet.getString("result");
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new ConnectionException(e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null) {
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }

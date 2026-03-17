@@ -18,33 +18,33 @@ import java.util.Map;
 public class MysqlUserDal implements IUserDal {
     @Override
     public boolean isExistsUser(String no, byte role) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         boolean isAvailable;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL isExists(?, ?)  }");
             statement.setString(1, no);
             statement.setInt(2, role);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 isAvailable = resultSet.getBoolean("result");
-            }else{
+            } else {
                 isAvailable = false;
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             isAvailable = false;
-        }finally {
-            try{
-                if(statement != null) {
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null) {
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -53,30 +53,30 @@ public class MysqlUserDal implements IUserDal {
 
     @Override
     public boolean deviceVerifyCountControl(String deviceID) throws ConnectionException, SQLException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         boolean result;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL deviceVerifyCountControl(?) }");
             statement.setString(1, deviceID);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 result = resultSet.getBoolean("result");
-            }else{
+            } else {
                 throw new SQLException(ErrorMessages.operationFailed);
             }
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -85,24 +85,24 @@ public class MysqlUserDal implements IUserDal {
 
     @Override
     public ResponseEntity deviceVerifyCountIncrease(String deviceID) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResponseEntity response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL deviceVerifyCountIncrease(?) }");
             statement.setString(1, deviceID);
             statement.execute();
             response = new ResponseEntity();
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntity(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -111,33 +111,33 @@ public class MysqlUserDal implements IUserDal {
 
     @Override
     public String getFullName(String userNo, byte role) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null) {
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         String result;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL fullName(?, ?) }");
             statement.setString(1, userNo);
             statement.setInt(2, role);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 result = resultSet.getString("fullName");
-            }else {
+            } else {
                 result = null;
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             result = null;
-        }finally {
-            try{
-                if(statement != null) {
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null) {
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -145,19 +145,19 @@ public class MysqlUserDal implements IUserDal {
     }
 
     @Override
-    public Object getAttribute(String userNo, byte role, String attribute)  throws ConnectionException {
-        if(MysqlConnection.getInstance() == null) {
+    public Object getAttribute(String userNo, byte role, String attribute) throws ConnectionException {
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
 
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         Object result;
-        try{
+        try {
             String query;
-            if(role == 0) {
+            if (role == 0) {
                 query = "select " + attribute + " from patient where phone = ? OR tc_number OR userID = ?";
-            }else {
+            } else {
                 query = "select " + attribute + " from doctor where phone = ? OR tc_number = ? OR userID = ?";
             }
             statement = MysqlConnection.getInstance().prepareStatement(query);
@@ -165,22 +165,22 @@ public class MysqlUserDal implements IUserDal {
             statement.setString(2, userNo);
             statement.setString(3, userNo);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 result = resultSet.getString(attribute);
-            }else{
+            } else {
                 result = null;
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             result = null;
-        }finally {
-            try{
-                if(statement != null) {
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null) {
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
 
@@ -189,51 +189,54 @@ public class MysqlUserDal implements IUserDal {
     }
 
     @Override
-    public Map<String,Object> getAttributes(String userNo, byte role, List<String> attributes) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null) {
+    public Map<String, Object> getAttributes(String userNo, byte role, List<String> attributes)
+            throws ConnectionException {
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
 
-        Map<String,Object> result = null;
+        Map<String, Object> result = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-        try{
+        try {
             StringBuilder query = new StringBuilder();
             query.append("select ");
             boolean firstItem = true;
-            for (String attribute:attributes){
-                if(firstItem)
+            for (String attribute : attributes) {
+                if (firstItem)
                     firstItem = false;
                 else
                     query.append(",");
                 query.append(attribute);
             }
             query.append(" from ")
-                    .append(role == Role.PATIENT.value() ? "patient LEFT patient_profile ON patient.userID = patient_profile.userID":"doctor LEFT JOIN doctor_profile ON doctor.userID = doctor_profile.doctorID")
-                    .append(role == Role.PATIENT.value() ? " WHERE patient.uname = ? or patient.userID = ?" : " WHERE doctor.uname = ? or doctor.userID = ?");
+                    .append(role == Role.PATIENT.value()
+                            ? "patient LEFT JOIN patient_profile ON patient.userID = patient_profile.userID"
+                            : "doctor LEFT JOIN doctor_profile ON doctor.userID = doctor_profile.doctorID")
+                    .append(role == Role.PATIENT.value() ? " WHERE patient.userID = ?"
+                            : " WHERE doctor.userID = ?");
             statement = MysqlConnection.getInstance().prepareStatement(query.toString());
             statement.setString(1, userNo);
-            statement.setString(2, userNo);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
-               result = new HashMap<>();
-                for (String attribute: attributes){
-                    result.put(attribute,resultSet.getString(attribute));
+            if (resultSet.next()) {
+                result = new HashMap<>();
+                for (String attribute : attributes) {
+                    result.put(attribute, resultSet.getString(attribute));
                 }
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             result = new HashMap<>();
             result.put("isSuccess", false);
             result.put("message", e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null) {
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null) {
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -241,29 +244,30 @@ public class MysqlUserDal implements IUserDal {
     }
 
     @Override
-    public boolean setAttribute(String userNo, byte role, String attribute, Object value)  throws ConnectionException,SQLException{
-        if(MysqlConnection.getInstance() == null)
+    public boolean setAttribute(String userNo, byte role, String attribute, Object value)
+            throws ConnectionException, SQLException {
+        if (MysqlConnection.getInstance() == null)
             throw new ConnectionException();
         PreparedStatement statement = null;
         boolean isSuccess;
-        try{
+        try {
             String query;
-            if(role == 0)
+            if (role == 0)
                 query = "update patient set " + attribute + " = ? where phone = ? or userID = ?";
             else
                 query = "update doctor set " + attribute + " = ? where phone = ? or userID = ?";
 
             statement = MysqlConnection.getInstance().prepareStatement(query);
-            statement.setObject(1,value);
-            statement.setString(2,userNo);
-            statement.setString(3,userNo);
+            statement.setObject(1, value);
+            statement.setString(2, userNo);
+            statement.setString(3, userNo);
             int result = statement.executeUpdate();
             isSuccess = result != 0;
-        }finally {
-            try{
-                if(statement != null)
+        } finally {
+            try {
+                if (statement != null)
                     statement.close();
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -272,18 +276,18 @@ public class MysqlUserDal implements IUserDal {
 
     @Override
     public ResponseEntitySet<List<UserInformation>> allUser(String type) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<List<UserInformation>> response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL allUser(?) }");
             statement.setString(1, type);
             List<UserInformation> informationList = new ArrayList<>();
             resultSet = statement.executeQuery();
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 informationList.add(new UserInformation(
                         resultSet.getString("name"),
                         resultSet.getString("surname"),
@@ -293,21 +297,20 @@ public class MysqlUserDal implements IUserDal {
                         resultSet.getBoolean("active"),
                         resultSet.getString("createDate"),
                         resultSet.getString("lastLogin"),
-                        resultSet.getString("type")
-                ));
+                        resultSet.getString("type")));
             }
             response = new ResponseEntitySet<>(informationList);
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -316,33 +319,33 @@ public class MysqlUserDal implements IUserDal {
 
     @Override
     public ResponseEntitySet<Boolean> phoneExists(String phone, byte role) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<Boolean> response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL phoneExists(?, ?) }");
             statement.setString(1, phone);
             statement.setByte(2, role);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 response = new ResponseEntitySet<>(resultSet.getBoolean("result"));
-            }else{
+            } else {
                 throw new ConnectionException(ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -351,39 +354,39 @@ public class MysqlUserDal implements IUserDal {
 
     @Override
     public ResponseEntity changePassword(String userID, byte role, ChangePassword data) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntity response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL changePassword(?, ?, ?, ?) }");
             statement.setString(1, userID);
             statement.setInt(2, role);
-            statement.setString(3, Functions.toSHA1(data.getCurrentPassword()));
-            statement.setString(4, Functions.toSHA1(data.getNewPassword()));
+            statement.setString(3, Functions.toSHA256(data.getCurrentPassword()));
+            statement.setString(4, Functions.toSHA256(data.getNewPassword()));
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
-                if(resultSet.getBoolean("result")){
+            if (resultSet.next()) {
+                if (resultSet.getBoolean("result")) {
                     response = new ResponseEntity();
-                }else{
+                } else {
                     response = new ResponseEntity(false, ErrorMessages.operationFailed);
                 }
-            }else{
+            } else {
                 throw new SQLException(ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntity(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -392,38 +395,36 @@ public class MysqlUserDal implements IUserDal {
 
     @Override
     public ResponseEntitySet<AvailableContact> availableContact(String uname, byte role) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<AvailableContact> response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL availableContact(?, ?) }");
             statement.setString(1, uname);
             statement.setByte(2, role);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 response = new ResponseEntitySet<>(
                         new AvailableContact(
                                 resultSet.getBoolean("availableMail"),
-                                resultSet.getBoolean("availableSms")
-                        )
-                );
-            }else{
+                                resultSet.getBoolean("availableSms")));
+            } else {
                 throw new SQLException(ErrorMessages.notAccessUserInformation);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -431,40 +432,39 @@ public class MysqlUserDal implements IUserDal {
     }
 
     @Override
-    public ResponseEntitySet<UserContactInformation> userContactInformation(String uname, byte role) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+    public ResponseEntitySet<UserContactInformation> userContactInformation(String uname, byte role)
+            throws ConnectionException {
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<UserContactInformation> response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL userContactInformation(?, ?) }");
             statement.setString(1, uname);
             statement.setByte(2, role);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 response = new ResponseEntitySet<>(
-                       new UserContactInformation(
-                               resultSet.getString("email"),
-                               resultSet.getString("phone"),
-                               resultSet.getString("fullName")
-                       )
-                );
-            }else{
+                        new UserContactInformation(
+                                resultSet.getString("email"),
+                                resultSet.getString("phone"),
+                                resultSet.getString("fullName")));
+            } else {
                 throw new SQLException(ErrorMessages.notAccessUserInformation);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -473,18 +473,18 @@ public class MysqlUserDal implements IUserDal {
 
     @Override
     public ResponseEntitySet<UserInformation> userInformation(String uname, byte role) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<UserInformation> response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL userInformation(?, ?) }");
             statement.setString(1, uname);
             statement.setByte(2, role);
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 response = new ResponseEntitySet<>(
                         new UserInformation(
                                 resultSet.getString("name"),
@@ -495,23 +495,21 @@ public class MysqlUserDal implements IUserDal {
                                 resultSet.getBoolean("active"),
                                 resultSet.getString("createDate"),
                                 resultSet.getString("lastLogin"),
-                                resultSet.getString("type")
-                        )
-                );
-            }else{
+                                resultSet.getString("type")));
+            } else {
                 throw new SQLException(ErrorMessages.notAccessUserInformation);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -520,38 +518,38 @@ public class MysqlUserDal implements IUserDal {
 
     @Override
     public ResponseEntity resetPassword(String userID, byte role, ResetPassword data) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntity response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL resetPassword(?, ?, ?) }");
             statement.setString(1, userID);
             statement.setByte(2, role);
-            statement.setString(3, Functions.toSHA1(data.getPassword()));
+            statement.setString(3, Functions.toSHA256(data.getPassword()));
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
-                if(resultSet.getBoolean("result")){
+            if (resultSet.next()) {
+                if (resultSet.getBoolean("result")) {
                     response = new ResponseEntity();
-                }else{
+                } else {
                     response = new ResponseEntity(false, ErrorMessages.operationFailed);
                 }
-            }else{
+            } else {
                 throw new SQLException(ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntity(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -559,37 +557,37 @@ public class MysqlUserDal implements IUserDal {
     }
 
     @Override
-    public ResponseEntitySet<Boolean> userPasswordVerify(String userID, byte role, String password) throws ConnectionException {
-        if(MysqlConnection.getInstance() == null){
+    public ResponseEntitySet<Boolean> userPasswordVerify(String userID, byte role, String password)
+            throws ConnectionException {
+        if (MysqlConnection.getInstance() == null) {
             throw new ConnectionException();
         }
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         ResponseEntitySet<Boolean> response;
-        try{
+        try {
             statement = MysqlConnection.getInstance().prepareStatement("{ CALL userPasswordVerify(?, ?, ?) }");
             statement.setString(1, userID);
             statement.setByte(2, role);
-            statement.setString(3, Functions.toSHA1(password));
+            statement.setString(3, Functions.toSHA256(password));
             resultSet = statement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 response = new ResponseEntitySet<>(
-                        resultSet.getBoolean("result")
-                );
-            }else{
+                        resultSet.getBoolean("result"));
+            } else {
                 throw new SQLException(ErrorMessages.operationFailed);
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             response = new ResponseEntitySet<>(false, e.getLocalizedMessage());
-        }finally {
-            try{
-                if(statement != null){
+        } finally {
+            try {
+                if (statement != null) {
                     statement.close();
                 }
-                if(resultSet != null){
+                if (resultSet != null) {
                     resultSet.close();
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
